@@ -1,303 +1,623 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Stealthbunk</title>
-  <style>
-    /* Import modern font */
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASCII-Bird</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Courier New', monospace;
+            background-color: black;
+            color: white;
+            overflow: hidden;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+        #game-screen {
+            white-space: pre;
+            line-height: 1;
+            font-size: 14px;
+            position: relative;
+            height: 100vh;
+        }
+        @media (min-width: 768px) {
+            #game-screen {
+                font-size: 16px;
+            }
+        }
+        #header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            z-index: 2;
+            text-shadow: 0 0 5px rgba(0, 255, 0, 0.7);
+        }
+        #title {
+            text-align: left;
+        }
+        #scores {
+            text-align: right;
+        }
+        #message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            border: 1px solid #ffffff;
+            padding: 25px;
+            border-radius: 5px;
+            z-index: 10;
+        }
+        
+        /* CRT and Grain Effects */
+        .crt-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+            z-index: 5;
+        }
+        
+        .crt-scanline {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 4;
+        }
+        
+        .crt-flicker {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(18, 16, 16, 0.1);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 3;
+            animation: flicker 0.15s infinite alternate;
+        }
+        
+        .grain {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.05;
+            pointer-events: none;
+            z-index: 2;
+        }
+        
+        @keyframes flicker {
+            0% { opacity: 0.1; }
+            100% { opacity: 0; }
+        }
+        
+        /* Game screen glow effect */
+        #game-screen {
+            color: rgba(180, 255, 180, 0.9);
+            text-shadow: 0 0 3px rgba(0, 255, 0, 0.5);
+        }
+        
+        .start-button {
+            margin-top: 20px;
+            display: inline-block;
+            padding: 10px 30px;
+            background-color: transparent;
+            border: 1px solid #ffffff;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .start-button:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
 
-    /* Modern Reset */
-    *, *::before, *::after {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+        /* Vignette Effect */
+        .vignette {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, rgba(0,0,0,0) 60%, rgba(0,0,0,0.5) 100%);
+            pointer-events: none;
+            z-index: 6;
+        }
 
-    :root {
-      --bg-primary: #0f0f0f;
-      --bg-secondary: #1a1a1a;
-      --text-primary: #ffffff;
-      --text-secondary: #a0a0a0;
-      --accent: #3a86ff;
-      --radius: 12px;
-      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    body {
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      background-color: var(--bg-primary);
-      color: var(--text-primary);
-      line-height: 1.6;
-      min-height: 100vh;
-      display: grid;
-      place-items: center;
-      padding: 24px;
-    }
-
-    .container {
-      width: 100%;
-      max-width: 420px;
-      position: relative;
-    }
-
-    /* Header section */
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 24px;
-      padding-top: 8px;
-      position: relative;
-    }
-
-    /* Title */
-    h3 {
-      font-size: 28px;
-      font-weight: 600;
-      margin: 0;
-    }
-
-    .subtitle {
-      font-size: 14px;
-      font-weight: 400;
-      color: var(--text-secondary);
-      margin-bottom: 32px;
-    }
-
-    /* Cards */
-    .card {
-      background-color: var(--bg-secondary);
-      padding: 24px;
-      border-radius: var(--radius);
-      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
-      margin-bottom: 16px;
-      opacity: 0;
-      transform: translateY(10px);
-      animation: fadeIn 0.5s forwards;
-    }
-
-    @keyframes fadeIn {
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    /* Form Elements */
-    .input-group {
-      margin-bottom: 20px;
-    }
-
-    label {
-      display: block;
-      font-size: 14px;
-      font-weight: 500;
-      margin-bottom: 8px;
-      color: var(--text-secondary);
-    }
-
-    input[type="number"] {
-      width: 100%;
-      padding: 12px 16px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: var(--radius);
-      background-color: rgba(255, 255, 255, 0.05);
-      color: var(--text-primary);
-      font-size: 16px;
-      transition: var(--transition);
-    }
-
-    input[type="number"]:focus {
-      outline: none;
-      border-color: var(--accent);
-      background-color: rgba(255, 255, 255, 0.07);
-    }
-
-    /* Button */
-    button.calculate {
-      width: 100%;
-      padding: 14px;
-      background-color: var(--accent);
-      color: white;
-      border: none;
-      border-radius: var(--radius);
-      font-size: 16px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: var(--transition);
-    }
-
-    button.calculate:hover {
-      background-color: #2a75ff;
-      transform: translateY(-1px);
-    }
-
-    button.calculate:active {
-      transform: translateY(0);
-    }
-
-    /* Loader */
-    .loader {
-      display: none;
-      width: 24px;
-      height: 24px;
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      border-radius: 50%;
-      border-top-color: var(--accent);
-      margin: 16px auto;
-      animation: spin 0.8s linear infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    /* Result */
-    #resultCard {
-      display: none;
-    }
-
-    #result {
-      font-size: 18px;
-      font-weight: 500;
-    }
-
-    /* Footer */
-    footer {
-      text-align: center;
-      font-size: 13px;
-      color: var(--text-secondary);
-      margin-top: 24px;
-    }
-
-    footer p {
-      margin-bottom: 8px;
-    }
-
-    footer a {
-      color: var(--accent);
-      text-decoration: none;
-    }
-
-    /* Responsive */
-    @media (max-width: 480px) {
-      .container {
-        max-width: 100%;
-      }
-      
-      h3 {
-        font-size: 24px;
-      }
-      
-      .card {
-        padding: 20px;
-      }
-    }
-  </style>
+        /* CRT Scan Line Effect */
+        .crt-scanline {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 255, 0, 0.05),
+                rgba(0, 255, 0, 0.05) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 7;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <!-- Header with Title and Back Button -->
-    <div class="header">
-      <h3>Simple Attendance Calculator</h3>
-    </div>
-    
-    <!-- Description -->
-    <p class="subtitle">Calculate how many classes you can skip or need to attend to maintain your desired attendance percentage.</p>
-
-    <!-- Input Card -->
-    <div class="card">
-      <div class="input-group">
-        <label for="totalClasses">Total Classes Held</label>
-        <input type="number" id="totalClasses" placeholder="Enter number">
-      </div>
-      
-      <div class="input-group">
-        <label for="attendedClasses">Classes Attended</label>
-        <input type="number" id="attendedClasses" placeholder="Enter number">
-      </div>
-      
-      <div class="input-group">
-        <label for="desiredPercentage">Minimum Percentage</label>
-        <span id="percentageValue">75%</span>
-      </div>
-      
-      <button class="calculate" onclick="calculateBunkDays()">Calculate</button>
-      <div class="loader" id="loader"></div>
+    <div id="game-container">
+        <div id="header">
+            <div id="title">ASCII-BIRD</div>
+            <div id="scores">SCORE: 0 | HIGH: 0</div>
+        </div>
+        <div id="game-screen"></div>
+        <div id="message">
+            CLICK TO START
+            <div class="start-button">PLAY</div>
+        </div>
+        
+        <!-- CRT Effect Overlays -->
+        <div class="crt-overlay"></div>
+        <div class="crt-scanline"></div>
+        <div class="crt-flicker"></div>
+        <div class="grain"></div>
+        <div class="vignette"></div>
     </div>
 
-    <!-- Result Card -->
-    <div class="card" id="resultCard">
-      <p id="result"></p>
-    </div>
-
-    <!-- Footer -->
-    <footer>
-      <p>Made with ❤️ by <a href="https://github.com/casper-bug" target="_blank">casper-bug</a></p>
-    </footer>
-  </div>
-
-  <script>
-    // Initialize elements
-    const loader = document.getElementById('loader');
-    const resultCard = document.getElementById('resultCard');
-    const resultText = document.getElementById('result');
-
-    // Calculate function
-    function calculateBunkDays() {
-      // Get input values
-      const totalClasses = parseInt(document.getElementById('totalClasses').value);
-      const attendedClasses = parseInt(document.getElementById('attendedClasses').value);
-      const desiredPercentage = 75; // Fixed at 75%
-
-      // Hide result and show loader
-      resultCard.style.display = 'none';
-      loader.style.display = 'block';
-
-      // Simulate processing delay for better UX
-      setTimeout(() => {
-        // Hide loader
-        loader.style.display = 'none';
-
-        // Validate inputs
-        if (isNaN(totalClasses) || isNaN(attendedClasses) || totalClasses <= 0 || attendedClasses < 0) {
-          resultText.textContent = "Please enter valid numbers for both fields.";
-          resultCard.style.display = 'block';
-          return;
+    <script>
+        // Game characters
+        const PLAYER_BIRD = ['>ᴗ<', '>(ᴗ)<'];  // Bird animation frames - new cute birdie
+        const OBSTACLE_PIPE_TOP = ['╔═╗', '║░║', '║▒║', '║▓║', '║█║'];  // Top pipe texture (varied)
+        const OBSTACLE_PIPE_BODY = ['║░║', '║▒║', '║▓║', '║█║', '║░║'];  // Pipe body texture (varied)
+        const OBSTACLE_PIPE_CAP = '╚═╝';  // Bottom cap of top pipe
+        const OBSTACLE_PIPE_TOP_CAP = '╔═╗';  // Top cap of bottom pipe
+        
+        // Improved ground with more variety
+        const TERRAIN_GROUND = ['▁', '▂', '▃', '▄', '▅', '▆', '▇', '█', '▆', '▅', '▄', '▃'];
+        const TERRAIN_PATTERN = ['~', '‿', '︵', '.', '˙', '⌣'];
+        
+        const EMPTY_SKY = ' ';  // Sky remains empty
+        
+        // Game state
+        let canvasWidth, canvasHeight;
+        let player = { 
+            position: { x: 0, y: 0 }, 
+            jumpVelocity: 0 
+        };
+        let obstacles = [];
+        let tick = 0;
+        let playerScore = 0;
+        let bestScore = 0;
+        let isGameActive = false;
+        let isGameEnded = false;
+        let gameRefreshRate = 50; // Milliseconds between frames
+        let gameSpeed = 1; // Base game speed multiplier
+        
+        // Safe localStorage wrapper function
+        function safeLocalStorage() {
+            let data = {};
+            
+            try {
+                // Test if localStorage is available
+                localStorage.setItem('test', 'test');
+                localStorage.removeItem('test');
+                
+                return {
+                    getItem: (key) => localStorage.getItem(key),
+                    setItem: (key, value) => localStorage.setItem(key, value)
+                };
+            } catch (e) {
+                // Fallback to memory storage if localStorage isn't available
+                console.warn('localStorage not available, using memory storage instead');
+                return {
+                    getItem: (key) => data[key] || null,
+                    setItem: (key, value) => { data[key] = value; }
+                };
+            }
         }
 
-        if (attendedClasses > totalClasses) {
-          resultText.textContent = "Attended classes cannot exceed total classes.";
-          resultCard.style.display = 'block';
-          return;
+        // Initialize using the safe localStorage wrapper
+        const storage = safeLocalStorage();
+        bestScore = storage.getItem('asciibird-highscore') 
+            ? parseInt(storage.getItem('asciibird-highscore')) 
+            : 0;
+        
+        // DOM elements
+        const gameCanvas = document.getElementById('game-screen');
+        const gameMessage = document.getElementById('message');
+        const scoreDisplay = document.getElementById('scores');
+        
+        // Initialize the game dimensions
+        function updateGameDimensions() {
+            resizeGameCanvas();
+            // If game is running, render the updated game world
+            if (isGameActive) {
+                renderGameWorld();
+            }
         }
-
-        // Calculate current attendance percentage
-        const currentPercentage = (attendedClasses / totalClasses) * 100;
-
-        if (currentPercentage >= desiredPercentage) {
-          // If current percentage is already above or equal to desired percentage
-          const bunkableClasses = Math.floor((attendedClasses * 100 / desiredPercentage) - totalClasses);
-
-          if (bunkableClasses > 0) {
-            resultText.textContent = `You can skip ${bunkableClasses} more class${bunkableClasses !== 1 ? 'es' : ''} and still maintain ${desiredPercentage}% attendance.`;
-          } else {
-            resultText.textContent = `You cannot skip any more classes while maintaining ${desiredPercentage}% attendance.`;
-          }
-        } else {
-          // If current percentage is below desired percentage
-          const classesNeededDecimal = (desiredPercentage * totalClasses - 100 * attendedClasses) / (100 - desiredPercentage);
-          const classesNeeded = Math.ceil(classesNeededDecimal);
-
-          resultText.textContent = `You need to attend ${classesNeeded} more class${classesNeeded !== 1 ? 'es' : ''} to reach ${desiredPercentage}% attendance.`;
+        
+        // Initialize the game world
+        function startNewGame() {
+            // Set up the game canvas dimensions
+            resizeGameCanvas();
+            
+            // Position the player bird
+            player.position.x = Math.floor(canvasWidth / 4);
+            player.position.y = Math.floor(canvasHeight / 2);
+            player.jumpVelocity = 0;
+            
+            // Clear any existing obstacles
+            obstacles = [];
+            
+            // Reset game progress
+            playerScore = 0;
+            gameSpeed = 1;
+            gameRefreshRate = 50;
+            updateScoreDisplay();
+            
+            // Hide the message
+            gameMessage.style.display = 'none';
+            
+            // Begin the game cycle
+            if (!isGameActive) {
+                isGameActive = true;
+                isGameEnded = false;
+                runGameLoop();
+            }
         }
-
-        // Show result card
-        resultCard.style.display = 'block';
-      }, 800);
-    }
-  </script>
+        
+        // Handle screen size changes
+        function resizeGameCanvas() {
+            // Determine optimal text size for current screen
+            const fontSize = window.innerWidth < 768 ? 14 : 16;
+            canvasWidth = Math.floor(window.innerWidth / (fontSize * 0.6));
+            canvasHeight = Math.floor(window.innerHeight / fontSize) - 2; // Leave space for header
+            
+            // Ensure minimum playable area
+            canvasWidth = Math.max(canvasWidth, 20);
+            canvasHeight = Math.max(canvasHeight, 10);
+        }
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            updateGameDimensions();
+        });
+        
+        // Render the game world
+        function renderGameWorld() {
+            let displayBuffer = '';
+            
+            // Build the visual representation row by row
+            for (let y = 0; y < canvasHeight; y++) {
+                for (let x = 0; x < canvasWidth; x++) {
+                    // Draw the ground at the bottom with improved texture
+                    if (y === canvasHeight - 1) {
+                        // Create more interesting ground texture with patterns
+                        if ((x + tick) % 3 === 0) {
+                            const patternIndex = Math.floor((x + tick/2) % TERRAIN_PATTERN.length);
+                            displayBuffer += TERRAIN_PATTERN[patternIndex];
+                        } else {
+                            const groundIndex = Math.floor((x + tick/2) % TERRAIN_GROUND.length);
+                            displayBuffer += TERRAIN_GROUND[groundIndex];
+                        }
+                    } 
+                    // Add some ground variation for the row above the ground
+                    else if (y === canvasHeight - 2 && Math.random() < 0.2) {
+                        const grassIndex = Math.floor(Math.random() * 2);
+                        displayBuffer += ['.', '\''][grassIndex];
+                    }
+                    // Draw obstacles (pipes) with more detail
+                    else if (isPipeAt(x, y)) {
+                        // Get pipe details for rendering
+                        const pipeDetails = getPipeDetailsAt(x, y);
+                        displayBuffer += pipeDetails;
+                    }
+                    // Draw the player bird with animation
+                    else if (x === player.position.x && y === Math.floor(player.position.y)) {
+                        // Animate bird based on game tick and velocity
+                        const birdFrame = (player.jumpVelocity < 0) ? 0 : 1;
+                        displayBuffer += PLAYER_BIRD[birdFrame];
+                    }
+                    // Fill remaining space with sky (occasionally add stars or clouds)
+                    else {
+                        if (Math.random() < 0.0005) {
+                            displayBuffer += ['·', '*', '°'][Math.floor(Math.random() * 3)];
+                        } else {
+                            displayBuffer += EMPTY_SKY;
+                        }
+                    }
+                }
+                // End of row
+                displayBuffer += '\n';
+            }
+            
+            // Update the visual display
+            gameCanvas.textContent = displayBuffer;
+        }
+        
+        // Get detailed pipe textures for a specific position
+        function getPipeDetailsAt(x, y) {
+            for (const obstacle of obstacles) {
+                if (x === obstacle.x) {
+                    // Top pipe section
+                    if (y < obstacle.gapStart) {
+                        // If at the bottom of top pipe (cap)
+                        if (y === obstacle.gapStart - 1) {
+                            return OBSTACLE_PIPE_CAP;
+                        }
+                        // If at the top edge of the screen (top cap)
+                        else if (y === 0) {
+                            return OBSTACLE_PIPE_TOP[0];
+                        }
+                        // Pipe body with varied texture based on position
+                        else {
+                            const textureIndex = (y + x) % OBSTACLE_PIPE_BODY.length;
+                            return OBSTACLE_PIPE_BODY[textureIndex];
+                        }
+                    }
+                    // Bottom pipe section
+                    else if (y > obstacle.gapStart + obstacle.gapSize) {
+                        // If at the top of bottom pipe (cap)
+                        if (y === obstacle.gapStart + obstacle.gapSize + 1) {
+                            return OBSTACLE_PIPE_TOP_CAP;
+                        }
+                        // Pipe body with varied texture
+                        else {
+                            const textureIndex = (y + x) % OBSTACLE_PIPE_BODY.length;
+                            return OBSTACLE_PIPE_BODY[textureIndex];
+                        }
+                    }
+                }
+            }
+            return EMPTY_SKY;
+        }
+        
+        // Check if there's a pipe at the given position
+        function isPipeAt(x, y) {
+            for (const obstacle of obstacles) {
+                if (x === obstacle.x) {
+                    // Position is within pipe if it's outside the gap
+                    return y < obstacle.gapStart || y > obstacle.gapStart + obstacle.gapSize;
+                }
+            }
+            return false;
+        }
+        
+        // Update game physics and state
+        function updateGameState() {
+            // Apply gravity to player
+            player.jumpVelocity += 0.5; 
+            player.position.y += player.jumpVelocity / 5;
+            
+            // Generate new obstacles with consistent but challenging gaps
+            const baseObstacleInterval = 45; // Base interval between pipes
+            const obstacleInterval = Math.round(baseObstacleInterval / gameSpeed);
+            
+            if (tick % obstacleInterval === 0) {
+                // Set appropriate gap size based on speed (smaller as speed increases)
+                // But ensure minimum playable size
+                const minGapSize = Math.max(8 - Math.floor(gameSpeed), 5);
+                
+                // Calculate appropriate gap position
+                let gapStart;
+                
+                if (obstacles.length > 0) {
+                    // Reference the last obstacle for position continuity
+                    const lastObstacle = obstacles[obstacles.length - 1];
+                    const lastGapCenter = lastObstacle.gapStart + (lastObstacle.gapSize / 2);
+                    
+                    // Calculate max possible displacement based on physics and distance
+                    // Maximum vertical movement possible given horizontal distance and jump physics
+                    const horizontalDistance = canvasWidth - lastObstacle.x;
+                    const maxVerticalTravel = Math.min(
+                        horizontalDistance * 0.4, // Limit based on horizontal distance
+                        canvasHeight / 3 // Hard limit to prevent impossible jumps
+                    );
+                    
+                    // Apply controlled randomness within physically possible range
+                    const verticalShift = (Math.random() * (maxVerticalTravel * 2)) - maxVerticalTravel;
+                    
+                    // Calculate new gap center position
+                    let newGapCenter = lastGapCenter + verticalShift;
+                    
+                    // Ensure gap is within bounds
+                    newGapCenter = Math.max(
+                        minGapSize / 2 + 1, // Keep gap away from top edge
+                        Math.min(
+                            newGapCenter,
+                            canvasHeight - (minGapSize / 2) - 2 // Keep gap away from bottom edge
+                        )
+                    );
+                    
+                    // Set the final gap start position
+                    gapStart = Math.floor(newGapCenter - (minGapSize / 2));
+                } else {
+                    // First obstacle - position near the middle with slight randomness
+                    const middlePosition = Math.floor(canvasHeight / 2) - Math.floor(minGapSize / 2);
+                    gapStart = middlePosition + Math.floor(Math.random() * 5) - 2; // Small random variance
+                }
+                
+                // Final bounds check to avoid the gap being too close to edges
+                gapStart = Math.max(1, Math.min(gapStart, canvasHeight - minGapSize - 2));
+                
+                // Add the new obstacle
+                obstacles.push({
+                    x: canvasWidth,
+                    gapStart: gapStart,
+                    gapSize: minGapSize,
+                    passed: false
+                });
+            }
+            
+            // Move and process all obstacles
+            for (let i = 0; i < obstacles.length; i++) {
+                const obstacle = obstacles[i];
+                
+                // Speed increases with gameSpeed but maintains consistent movement
+                obstacle.x -= Math.ceil(gameSpeed);
+                
+                // Award points for successful navigation
+                if (!obstacle.passed && obstacle.x < player.position.x) {
+                    obstacle.passed = true;
+                    playerScore++;
+                    updateScoreDisplay();
+                    
+                    // More gradual speed increase
+                    if (playerScore > 0 && playerScore % 50 === 0) {
+                        // Very small speed increment
+                        gameSpeed = Math.min(gameSpeed + 0.05, 1.5); 
+                    }
+                }
+                
+                // Remove obstacles that have moved offscreen
+                if (obstacle.x < -1) { // Adjust to -1 to ensure smooth exit
+                    obstacles.splice(i, 1);
+                    i--;
+                }
+            }
+            
+            // Detect collisions
+            if (detectCollision()) {
+                isGameActive = false;
+                isGameEnded = true;
+                
+                // Update high score if needed
+                if (playerScore > bestScore) {
+                    bestScore = playerScore;
+                    storage.setItem('asciibird-highscore', bestScore);
+                    updateScoreDisplay();
+                }
+                
+                // Show end-game message with minimalist button
+                gameMessage.innerHTML = 'GAME OVER<div class="start-button">PLAY AGAIN</div>';
+                gameMessage.style.display = 'block';
+            }
+            
+            tick++;
+        }
+        
+        // Detect player collisions with obstacles or boundaries
+        function detectCollision() {
+            const playerY = Math.floor(player.position.y);
+            
+            // Check for ground collision
+            if (playerY >= canvasHeight - 1) {
+                return true;
+            }
+            
+            // Check for ceiling collision
+            if (playerY < 0) {
+                return true;
+            }
+            
+            // Check for obstacle collisions with better hit detection
+            for (const obstacle of obstacles) {
+                // Bird hitbox (slightly more forgiving)
+                if (obstacle.x === player.position.x) {
+                    // Check if player is outside the gap (collision)
+                    if (playerY < obstacle.gapStart || playerY > obstacle.gapStart + obstacle.gapSize) {
+                        return true;
+                    }
+                }
+            }
+            
+            // No collisions detected
+            return false;
+        }
+        
+        // Update the score display
+        function updateScoreDisplay() {
+            scoreDisplay.textContent = `SCORE: ${playerScore} | HIGH: ${bestScore}`;
+        }
+        
+        // Main game loop
+        function runGameLoop() {
+            if (!isGameActive) return;
+            
+            updateGameState();
+            renderGameWorld();
+            
+            // Schedule next frame with consistent timing
+            setTimeout(() => {
+                requestAnimationFrame(runGameLoop);
+            }, gameRefreshRate);
+        }
+        
+        // Handle input (click/tap/keyboard)
+        function handleInput() {
+            // Make the bird jump by giving it upward velocity
+            player.jumpVelocity = -3.5;
+            
+            // Start the game if it's not active yet
+            if (!isGameActive && !isGameEnded) {
+                startNewGame();
+            }
+            // Restart the game if it ended
+            else if (isGameEnded) {
+                startNewGame();
+            }
+        }
+        
+        // Add event listeners for different input methods
+        window.addEventListener('mousedown', handleInput);
+        window.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // Prevent scrolling
+            handleInput();
+        });
+        window.addEventListener('keydown', (e) => {
+            // Allow using space, up arrow, or enter to jump
+            if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'Enter') {
+                e.preventDefault();
+                handleInput();
+            }
+        });
+        
+        // Initialize the game when page loads
+        window.addEventListener('load', () => {
+            updateGameDimensions();
+            renderGameWorld();
+            
+            // Show ready message with minimalist button
+            gameMessage.innerHTML = 'CLICK TO START<div class="start-button">PLAY</div>';
+            gameMessage.style.display = 'block';
+        });
+    </script>
 </body>
 </html>
