@@ -940,6 +940,9 @@
                             addSubjectFromData(courseName, totalHours, attendedHours);
                         }
                     });
+
+                    // Automatically calculate and update timetable after file upload
+                    applyTimetable();
                 };
                 reader.readAsArrayBuffer(file);
             }
