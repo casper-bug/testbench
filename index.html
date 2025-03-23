@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StealthBunk V2</title>
+    <style>
+        /* Main theme colors */
+        :root {
+            --bg-primary: #121212;
+            --bg-secondary: #1e1e1e;
+            --bg-tertiary: #252525;
+            --text-primary: #e0e0e0;
+            --text-secondary: #b0b0b0;
+            --accent-primary: #6200ee;
+            --accent-secondary: #bb86fc;
+            --error: #cf6679;
+            --success: #03dac6;
+            --warning: #ffab40;
+            --card-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+            --border-color: #3d3d3d;
+        }
+
+        /* Base styles */
+        body {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            background: var(--bg-secondary);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+        }
+
+        h1, h2, h3 {
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(90deg, var(--accent-secondary), var(--accent-primary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            color: var(--accent-secondary);
+            margin-top: 30px;
+        }
+
+        h3 {
+            font-size: 1.3rem;
+            border-bottom: 1px solid var(--bg-tertiary);
+            padding-bottom: 10px;
+        }
+
+        button {
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px 5px 5px 0;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        button:hover {
+            background: var(--accent-secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            border-left: 5px solid var(--accent-primary);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Subject entries */
+        .subject-entry {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+            background: var(--bg-tertiary);
+            padding: 15px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .subject-entry:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .subject-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .add-subject-btn {
+            background: var(--success);
+        }
+
+        .remove-subject-btn {
+            background: var(--error);
+            padding: 6px 10px;
+            margin: 0;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .small-input {
+            width: 60px;
+            padding: 8px;
+            margin: 0 5px;
+        }
+
+        .color-indicator {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Status indicators */
+        .bunk-status {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-left: 5px;
+            font-weight: 500;
+        }
+
+        .can-bunk-status {
+            background: rgba(3, 218, 198, 0.2);
+            color: var(--success);
+        }
+
+        .cannot-bunk-status {
+            background: rgba(207, 102, 121, 0.2);
+            color: var(--error);
+        }
+
+        /* Timetable styles */
+        .timetable-grid {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .timetable-grid th, .timetable-grid td {
+            text-align: center;
+            padding: 15px;
+            position: relative;
+            border: 1px solid var(--border-color);
+        }
+
+        .timetable-grid th {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .timetable-grid td {
+            height: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .timetable-grid td.can-bunk {
+            background: rgba(3, 218, 198, 0.1);
+            border-left: 3px solid var(--success);
+        }
+
+        .timetable-grid td.cannot-bunk {
+            background: rgba(207, 102, 121, 0.1);
+            border-left: 3px solid var(--error);
+        }
+
+        /* Fix for the checkbox container in the last column */
+        .timetable-grid td:last-child {
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .bunk-checkbox-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .subject-cell {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-weight: 200; /* Extremely thin font weight */
+            font-size: 0.65rem; /* Keep small font size */
+            color: rgba(50, 50, 50, 0.7); /* Much darker color */
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .subject-cell:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Subject picker modal */
+        .subject-picker-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .subject-picker-content {
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .subject-list {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .subject-option {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .subject-option:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .clear-subject {
+            border: 1px dashed var(--text-secondary);
+            justify-content: center;
+            color: var(--text-secondary);
+        }
+
+        /* Period controls */
+        .period-controls {
+            display: flex;
+            align-items: center;
+            margin-top: 15px;
+            margin-bottom: 15px;
+            gap: 10px;
+        }
+
+        .period-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 20px;
+            padding: 0;
+        }
+
+        .period-display {
+            font-weight: 500;
+            color: var(--text-primary);
+            margin: 0 10px;
+        }
+
+        /* Checkboxes */
+        input[type="checkbox"] {
+            accent-color: var(--accent-primary);
+            width: auto;
+            margin-right: 8px;
+        }
+
+        input[type="text"], input[type="number"] {
+            padding: 8px;
+            border: 1px solid #444;
+            background: var(--bg-primary);
+            border-radius: 8px;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--accent-secondary);
+            box-shadow: 0 0 0 2px rgba(187, 134, 252, 0.3);
+        }
+
+        label {
+            color: var(--text-secondary);
+            font-weight: 500;
+            margin-right: 5px;
+        }
+
+        /* Media Queries for Mobile Optimization */
+        @media only screen and (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            .container {
+                padding: 15px;
+                margin: 10px;
+            }
+
+            .subject-entry {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .subject-entry input {
+                width: 100%;
+                margin-bottom: 8px;
+            }
+
+            .small-input {
+                width: 100%;
+            }
+
+            .timetable-grid th, .timetable-grid td {
+                padding: 10px;
+                font-size: 12px;
+            }
+
+            .timetable-grid td {
+                height: 40px;
+            }
+
+            .subject-list {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Dark scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="TimetableCalculator">
+            <h2>Timetable Calculator</h2>
+            <p>Enter your subjects and create your weekly timetable to calculate which days you can bunk.</p>
+            
+            <div class="subject-summary">
+                <h3>Subject Information</h3>
+                <div class="subject-controls">
+                    <button class="add-subject-btn" onclick="addSubject()">Add Subject</button>
+                    <input type="file" id="fileInput" accept=".xlsx,.csv,.doc,.docx" style="display: none;" onchange="handleFileUpload(event)">
+                    <button onclick="document.getElementById('fileInput').click()">Import from File</button>
+                </div>
+                
+                <div id="subjects-container">
+                    <!-- Subject entries will be added here -->
+                </div>
+            </div>
+            
+            <div class="timetable-container">
+                <div class="period-controls">
+                    <button class="period-btn" onclick="adjustPeriods(-1)">-</button>
+                    <span class="period-display">Hours : <span id="period-count">7</span></span>
+                    <button class="period-btn" onclick="adjustPeriods(1)">+</button>
+                </div>
+                
+                <div class="timetable-wrapper">
+                    <table class="timetable-grid" id="timetable-grid">
+                        <thead>
+                            <tr id="timetable-header">
+                                <th>Day / Hours</th>
+                                <!-- Period headers will be added dynamically -->
+                                <th>Bunk Day</th>
+                            </tr>
+                        </thead>
+                        <tbody id="timetable-body">
+                            <!-- Timetable rows will be added here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="bunk-section">
+                <p>Select the days you want to bunk and see if it's safe to do so.</p>
+                <button onclick="calculateBunkPlan()">Check Bunk Plan</button>
+                <div class="result">
+                    <h3>Bunk Analysis Results:</h3>
+                    <div id="bunk-results">
+                        <!-- Bunk results will be displayed here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Subject Picker Modal -->
+    <div id="subject-picker-modal" class="subject-picker-modal">
+        <div class="subject-picker-content">
+            <h3>Select Subject</h3>
+            <div id="subject-list" class="subject-list">
+                <!-- Subject options will be added here -->
+            </div>
+            <button onclick="closeSubjectModal()">Cancel</button>
+        </div>
+    </div>
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        // Initialize variables
+        const subjectColors = [
+            '#FF6B6B', '#48DBFB', '#1DD1A1', '#FD79A8', '#F7B731', 
+            '#A29BFE', '#54A0FF', '#00D2D3', '#576574', '#FF9F43'
+        ];
+        const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        let periodCount = 7; // Now this is modifiable
+        
+        let subjects = [];
+        let timetable = {};
+        let bunkPlan = {};
+        let currentCell = null; // To track which cell the modal is for
+        
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTimetableData();
+            
+            // Add first subject
+            addSubject();
+            
+            // Initialize timetable
+            initializeTimetable();
+        });
+
+        // Initialize or reinitialize the timetable data structure
+        function initializeTimetableData() {
+            timetable = {};
+            bunkPlan = {};
+            
+            days.forEach(day => {
+                timetable[day] = {};
+                bunkPlan[day] = false;
+                
+                for (let period = 1; period <= periodCount; period++) {
+                    timetable[day][period] = null;
+                }
+            });
+        }
+        
+        // Subject management functions
+        function addSubject() {
+            const subjectsContainer = document.getElementById('subjects-container');
+            const subjectId = `subject-${subjects.length + 1}`;
+            const colorIndex = subjects.length % subjectColors.length;
+            const color = subjectColors[colorIndex];
+            
+            const newSubjectEntry = document.createElement('div');
+            newSubjectEntry.className = 'subject-entry';
+            newSubjectEntry.innerHTML = `
+                <div class="color-indicator" style="background-color: ${color};"></div>
+                <input type="text" placeholder="Subject Name" class="subject-name" value="Subject ${subjects.length + 1}">
+                <label>Min %:</label>
+                <input type="number" placeholder="Min %" class="min-percentage small-input" min="0" max="100" value="75">
+                <label>Total:</label>
+                <input type="number" placeholder="Total" class="total-classes small-input" min="1" value="0">
+                <label>Present:</label>
+                <input type="number" placeholder="Present" class="attended-classes small-input" min="0" value="0">
+                <span class="bunk-status"></span>
+                <button class="remove-subject-btn" onclick="removeSubject(this)">✕</button>
+            `;
+            
+            subjectsContainer.appendChild(newSubjectEntry);
+            
+            // Add subject to array
+            subjects.push({
+                id: subjectId,
+                name: `Subject ${subjects.length + 1}`,
+                color: color,
+                minPercentage: 75,
+                totalClasses: 0,
+                attendedClasses: 0,
+                canBunk: 0
+            });
+            
+            // Add real-time updates for subject name
+            const subjectNameInput = newSubjectEntry.querySelector('.subject-name');
+            subjectNameInput.addEventListener('input', function() {
+                const index = Array.from(subjectsContainer.children).indexOf(newSubjectEntry);
+                subjects[index].name = this.value;
+                applyTimetable(); // Automatically update timetable
+            });
+            
+            // Add input event listeners for other fields to update calculations in real-time
+            const minPercentageInput = newSubjectEntry.querySelector('.min-percentage');
+            const totalClassesInput = newSubjectEntry.querySelector('.total-classes');
+            const attendedClassesInput = newSubjectEntry.querySelector('.attended-classes');
+            
+            const updateSubjectData = function() {
+                const index = Array.from(subjectsContainer.children).indexOf(newSubjectEntry);
+                subjects[index].minPercentage = parseInt(minPercentageInput.value) || 75;
+                subjects[index].totalClasses = parseInt(totalClassesInput.value) || 0;
+                subjects[index].attendedClasses = parseInt(attendedClassesInput.value) || 0;
+                
+                // Calculate updates and update timetable
+                calculateAllSubjects();
+                applyTimetable(); // Automatically update timetable
+            };
+            
+            minPercentageInput.addEventListener('input', updateSubjectData);
+            totalClassesInput.addEventListener('input', updateSubjectData);
+            attendedClassesInput.addEventListener('input', updateSubjectData);
+        }
+        
+        function removeSubject(btn) {
+            const subjectsContainer = document.getElementById('subjects-container');
+            const subjectEntry = btn.parentElement;
+            const index = Array.from(subjectsContainer.children).indexOf(subjectEntry);
+            
+            // Only remove if there's more than one subject
+            if (subjectsContainer.children.length > 1) {
+                subjectsContainer.removeChild(subjectEntry);
+                subjects.splice(index, 1);
+                
+                // Update timetable - remove this subject from any cells
+                for (const day in timetable) {
+                    for (const period in timetable[day]) {
+                        if (timetable[day][period] === index) {
+                            timetable[day][period] = null;
+                        } else if (timetable[day][period] > index) {
+                            // Adjust indices for subjects that come after the removed one
+                            timetable[day][period]--;
+                        }
+                    }
+                }
+                
+                applyTimetable(); // Automatically update timetable
+            }
+        }
+        
+        function calculateAllSubjects() {
+            const subjectEntries = document.querySelectorAll('.subject-entry');
+            
+            subjectEntries.forEach((entry, index) => {
+                const subjectName = entry.querySelector('.subject-name').value || `Subject ${index + 1}`;
+                const minPercentage = parseInt(entry.querySelector('.min-percentage').value) || 75;
+                const totalClasses = parseInt(entry.querySelector('.total-classes').value) || 0;
+                const attendedClasses = parseInt(entry.querySelector('.attended-classes').value) || 0;
+                
+                if (attendedClasses > totalClasses) {
+                    // We'll just clamp the values instead of showing an alert for a smoother experience
+                    entry.querySelector('.attended-classes').value = totalClasses;
+                    subjects[index].attendedClasses = totalClasses;
+                }
+                
+                // Calculate current percentage
+                const currentPercentage = totalClasses > 0 ? (attendedClasses / totalClasses) * 100 : 0;
+                
+                // Calculate how many classes can be bunked
+                const minClassesToAttend = Math.ceil((totalClasses * minPercentage) / 100);
+                const canBunk = Math.max(0, attendedClasses - minClassesToAttend);
+                
+                // Update subject in array
+                subjects[index].name = subjectName;
+                subjects[index].minPercentage = minPercentage;
+                subjects[index].totalClasses = totalClasses;
+                subjects[index].attendedClasses = attendedClasses;
+                subjects[index].canBunk = canBunk;
+                subjects[index].currentPercentage = currentPercentage;
+                
+                // Display result
+                const status = entry.querySelector('.bunk-status');
+                status.textContent = `${currentPercentage.toFixed(1)}% | Can bunk: ${canBunk}`;
+                status.className = canBunk > 0 ? 'bunk-status can-bunk-status' : 'bunk-status cannot-bunk-status';
+            });
+        }
+        
+        // Function to adjust number of periods
+        function adjustPeriods(change) {
+            const newPeriodCount = Math.max(1, Math.min(12, periodCount + change));
+            
+            if (newPeriodCount !== periodCount) {
+                periodCount = newPeriodCount;
+                document.getElementById('period-count').textContent = periodCount;
+                
+                // Update timetable data structure
+                initializeTimetableData();
+                
+                // Rebuild the timetable UI
+                initializeTimetable();
+            }
+        }
+        
+        // Timetable functions
+        function initializeTimetable() {
+            // Update the header row
+            const timetableHeader = document.getElementById('timetable-header');
+            // Clear all but the first and last th elements
+            while (timetableHeader.children.length > 2) {
+                timetableHeader.removeChild(timetableHeader.children[1]);
+            }
+            
+            // Add period headers
+            for (let period = 1; period <= periodCount; period++) {
+                const th = document.createElement('th');
+                th.textContent = `Hour ${period}`;
+                timetableHeader.insertBefore(th, timetableHeader.lastElementChild);
+            }
+            
+            // Update the body rows
+            const timetableBody = document.getElementById('timetable-body');
+            timetableBody.innerHTML = '';
+            
+            // Create days (rows)
+            days.forEach(day => {
+                const row = document.createElement('tr');
+                row.innerHTML = `<th>${day}</th>`;
+                
+                // Create periods (columns)
+                for (let period = 1; period <= periodCount; period++) {
+                    const cell = document.createElement('td');
+                    cell.dataset.day = day;
+                    cell.dataset.period = period;
+                    
+                    // Create subject cell div
+                    const subjectCell = document.createElement('div');
+                    subjectCell.className = 'subject-cell';
+                    subjectCell.textContent = "Click to select";
+                    
+                    // Add click event to open subject picker
+                    subjectCell.addEventListener('click', function() {
+                        openSubjectModal(day, period);
+                    });
+                    
+                    cell.appendChild(subjectCell);
+                    row.appendChild(cell);
+                }
+                
+                // Add bunk checkbox for the day
+                const bunkCell = document.createElement('td');
+                bunkCell.innerHTML = `
+                    <div class="bunk-checkbox-container">
+                        <input type="checkbox" id="bunk-${day}" class="bunk-checkbox">
+                        <label for="bunk-${day}">Select</label>
+                    </div>
+                    <span id="bunk-status-${day}" class="bunk-status"></span>
+                `;
+                
+                // Add event listener to checkbox
+                bunkCell.querySelector('.bunk-checkbox').addEventListener('change', function() {
+                    updateBunkPlan(day);
+                });
+                
+                row.appendChild(bunkCell);
+                timetableBody.appendChild(row);
+            });
+            
+            applyTimetable(); // Automatically update timetable display
+        }
+        
+        // Open subject selection modal
+        function openSubjectModal(day, period) {
+            const modal = document.getElementById('subject-picker-modal');
+            const subjectList = document.getElementById('subject-list');
+            currentCell = { day, period };
+            
+            // Clear previous options
+            subjectList.innerHTML = '';
+            
+            // Add clear option
+            const clearOption = document.createElement('div');
+            clearOption.className = 'subject-option clear-subject';
+            clearOption.textContent = 'Clear Cell';
+            clearOption.addEventListener('click', function() {
+                selectSubject(null);
+            });
+            subjectList.appendChild(clearOption);
+            
+            // Add subject options
+            subjects.forEach((subject, index) => {
+                const option = document.createElement('div');
+                option.className = 'subject-option';
+                option.style.backgroundColor = subject.color + '40';
+                option.innerHTML = `
+                    <div class="color-indicator" style="background-color: ${subject.color};"></div>
+                    <span>${subject.name}</span>
+                `;
+                
+                option.addEventListener('click', function() {
+                    selectSubject(index);
+                });
+                
+                subjectList.appendChild(option);
+            });
+            
+            // Display modal
+            modal.style.display = 'flex';
+        }
+        
+        // Close subject selection modal
+        function closeSubjectModal() {
+            const modal = document.getElementById('subject-picker-modal');
+            modal.style.display = 'none';
+            currentCell = null;
+        }
+        
+        // Select subject and update timetable
+        function selectSubject(subjectIndex) {
+            if (currentCell) {
+                const { day, period } = currentCell;
+                timetable[day][period] = subjectIndex;
+                applyTimetable(); // Automatically update timetable
+                closeSubjectModal();
+            }
+        }
+        
+        function applyTimetable() {
+            // Calculate all subjects
+            calculateAllSubjects();
+            
+            // Update the timetable display
+            updateTimetableDisplay();
+        }
+        
+        function updateTimetableDisplay() {
+            const cells = document.querySelectorAll('#timetable-grid td[data-day]');
+            
+            cells.forEach(cell => {
+                const day = cell.dataset.day;
+                const period = cell.dataset.period;
+                const subjectIndex = timetable[day][period];
+                const subjectCell = cell.querySelector('.subject-cell');
+                
+                if (subjectIndex !== null) {
+                    const subject = subjects[subjectIndex];
+                    // Use subject code or color only
+                    subjectCell.textContent = subject.name.substring(0, 3); // First 3 letters as code
+                    subjectCell.style.backgroundColor = subject.color + '40';
+                    
+                    // Add visual indication if can bunk
+                    if (subject.canBunk > 0) {
+                        cell.classList.add('can-bunk');
+                        cell.classList.remove('cannot-bunk');
+                    } else {
+                        cell.classList.add('cannot-bunk');
+                        cell.classList.remove('can-bunk');
+                    }
+                } else {
+                    subjectCell.textContent = "Click to select";
+                    subjectCell.style.backgroundColor = "";
+                    cell.classList.remove('can-bunk', 'cannot-bunk');
+                }
+            });
+        }
+        
+        // Bunk planning functions
+        function updateBunkPlan(day) {
+            const checkbox = document.getElementById(`bunk-${day}`);
+            bunkPlan[day] = checkbox.checked;
+        }
+        
+        function calculateBunkPlan() {
+            // Make sure we have the latest calculations
+            calculateAllSubjects();
+            
+            // Now analyze the bunk plan
+            const bunkResults = document.getElementById('bunk-results');
+            bunkResults.innerHTML = '';
+            
+            const selectedDays = days.filter(day => bunkPlan[day]);
+            
+            if (selectedDays.length === 0) {
+                bunkResults.innerHTML = '<p>No days selected for bunking.</p>';
+                return;
+            }
+            
+            // Create temporary copy of subjects to simulate the bunk plan
+            const tempSubjects = JSON.parse(JSON.stringify(subjects));
+            
+            // Analyze each selected day
+            let allSafe = true;
+            const results = [];
+            
+            selectedDays.forEach(day => {
+                let dayResult = { 
+                    day: day, 
+                    subjects: [], 
+                    safe: true 
+                };
+                
+                // Check each period of the day
+                for (let period = 1; period <= periodCount; period++) {
+                    const subjectIndex = timetable[day][period];
+                    if (subjectIndex !== null) {
+                        const subject = tempSubjects[subjectIndex];
+                        
+                        // Check if this subject can be bunked
+                        if (subject.canBunk <= 0) {
+                            dayResult.safe = false;
+                            allSafe = false;
+                        }
+                        
+                        // Add subject to the day's results if not already there
+                        if (!dayResult.subjects.some(s => s.index === subjectIndex)) {
+                            dayResult.subjects.push({
+                                index: subjectIndex,
+                                name: subject.name,
+                                canBunk: subject.canBunk
+                            });
+                            
+                            // Decrease the canBunk count for this subject
+                            subject.canBunk--;
+                        }
+                    }
+                }
+                
+                results.push(dayResult);
+            });
+            
+            // Display results
+            if (allSafe) {
+                bunkResults.innerHTML = '<p style="color: var(--success); font-weight: bold;">✓ It\'s safe to bunk all selected days!</p>';
+            } else {
+                bunkResults.innerHTML = '<p style="color: var(--error); font-weight: bold;">✗ Not safe to bunk all selected days.</p>';
+            }
+            
+            results.forEach(result => {
+                const dayResult = document.createElement('div');
+                dayResult.innerHTML = `
+                    <h4>${result.day} - ${result.safe ? 
+                        '<span style="color: var(--success);">Safe to bunk</span>' : 
+                        '<span style="color: var(--error);">Not safe to bunk</span>'}</h4>
+                    <ul>
+                        ${result.subjects.map(subject => `
+                            <li>${subject.name}: ${subject.canBunk} bunks remaining</li>
+                        `).join('')}
+                    </ul>
+                `;
+                bunkResults.appendChild(dayResult);
+            });
+        }
+
+        // Handle file upload
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const sheetName = workbook.SheetNames[0];
+                    const sheet = workbook.Sheets[sheetName];
+                    const json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+                    // Clear existing subjects
+                    const subjectsContainer = document.getElementById('subjects-container');
+                    subjectsContainer.innerHTML = '';
+                    subjects = [];
+
+                    // Add subjects from the file
+                    json.slice(5).forEach(row => {
+                        const courseName = row[1];
+                        const totalHours = row[2];
+                        const attendedHours = row[3];
+                        if (courseName && totalHours && attendedHours) {
+                            addSubjectFromData(courseName, totalHours, attendedHours);
+                        }
+                    });
+                };
+                reader.readAsArrayBuffer(file);
+            }
+        }
+
+        function addSubjectFromData(name, totalClasses, attendedClasses) {
+            const subjectsContainer = document.getElementById('subjects-container');
+            const subjectId = `subject-${subjects.length + 1}`;
+            const colorIndex = subjects.length % subjectColors.length;
+            const color = subjectColors[colorIndex];
+            
+            const newSubjectEntry = document.createElement('div');
+            newSubjectEntry.className = 'subject-entry';
+            newSubjectEntry.innerHTML = `
+                <div class="color-indicator" style="background-color: ${color};"></div>
+                <input type="text" placeholder="Subject Name" class="subject-name" value="${name}">
+                <label>Min %:</label>
+                <input type="number" placeholder="Min %" class="min-percentage small-input" min="0" max="100" value="75">
+                <label>Total:</label>
+                <input type="number" placeholder="Total" class="total-classes small-input" min="1" value="${totalClasses}">
+                <label>Present:</label>
+                <input type="number" placeholder="Present" class="attended-classes small-input" min="0" value="${attendedClasses}">
+                <span class="bunk-status"></span>
+                <button class="remove-subject-btn" onclick="removeSubject(this)">✕</button>
+            `;
+            
+            subjectsContainer.appendChild(newSubjectEntry);
+            
+            // Add subject to array
+            subjects.push({
+                id: subjectId,
+                name: name,
+                color: color,
+                minPercentage: 75,
+                totalClasses: totalClasses,
+                attendedClasses: attendedClasses,
+                canBunk: 0
+            });
+            
+            // Add real-time updates for subject name
+            const subjectNameInput = newSubjectEntry.querySelector('.subject-name');
+            subjectNameInput.addEventListener('input', function() {
+                const index = Array.from(subjectsContainer.children).indexOf(newSubjectEntry);
+                subjects[index].name = this.value;
+                applyTimetable(); // Automatically update timetable
+            });
+            
+            // Add input event listeners for other fields to update calculations in real-time
+            const minPercentageInput = newSubjectEntry.querySelector('.min-percentage');
+            const totalClassesInput = newSubjectEntry.querySelector('.total-classes');
+            const attendedClassesInput = newSubjectEntry.querySelector('.attended-classes');
+            
+            const updateSubjectData = function() {
+                const index = Array.from(subjectsContainer.children).indexOf(newSubjectEntry);
+                subjects[index].minPercentage = parseInt(minPercentageInput.value) || 75;
+                subjects[index].totalClasses = parseInt(totalClassesInput.value) || 0;
+                subjects[index].attendedClasses = parseInt(attendedClassesInput.value) || 0;
+                
+                // Calculate updates and update timetable
+                calculateAllSubjects();
+                applyTimetable(); // Automatically update timetable
+            };
+            
+            minPercentageInput.addEventListener('input', updateSubjectData);
+            totalClassesInput.addEventListener('input', updateSubjectData);
+            attendedClassesInput.addEventListener('input', updateSubjectData);
+        }
+    </script>
+</body>
+</html>
