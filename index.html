@@ -21,13 +21,14 @@
             width: 100vw;
             height: 100vh;
             overflow: hidden;
+            padding-bottom: 60px; /* Add space at the bottom for the mute button */
         }
         #game-screen {
             white-space: pre;
             line-height: 1;
             font-size: 14px;
             position: relative;
-            height: 100vh;
+            height: calc(100vh - 60px); /* Adjust height to account for padding */
         }
         @media (min-width: 768px) {
             #game-screen {
@@ -166,7 +167,7 @@
         /* Improved Mute Button with Slash Effect */
         #mute-button {
             position: absolute;
-            bottom: 20px;
+            bottom: 20px; /* Position relative to the game container */
             right: 20px;
             width: 40px;
             height: 40px;
