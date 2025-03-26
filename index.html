@@ -3,743 +3,618 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ASCII-Bird</title>
+    <title>Distressed Photo Effects</title>
     <style>
         body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Courier New', monospace;
-            background-color: black;
-            color: white;
-            overflow: hidden;
-            touch-action: manipulation;
-            user-select: none;
-            -webkit-user-select: none;
-        }
-        #game-container {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden;
-            padding-bottom: 60px; /* Add space at the bottom for the mute button */
-        }
-        #game-screen {
-            white-space: pre;
-            line-height: 1;
-            font-size: 14px;
-            position: relative;
-            height: calc(100vh - 60px); /* Adjust height to account for padding */
-        }
-        @media (min-width: 768px) {
-            #game-screen {
-                font-size: 16px;
-            }
-        }
-        #header {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            padding: 10px;
-            display: flex;
-            justify-content: space-between;
-            font-weight: bold;
-            z-index: 2;
-            text-shadow: 0 0 5px rgba(0, 255, 0, 0.7);
-        }
-        #title {
-            text-align: left;
-        }
-        #scores {
-            text-align: right;
-        }
-        #message {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            font-size: 1.5em;
-            font-weight: bold;
-            background-color: rgba(0, 0, 0, 0.8);
-            color: white;
-            border: 1px solid #ffffff;
+            font-family: 'Arial', sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
             padding: 20px;
-            border-radius: 5px;
-            z-index: 10;
-            width: 80%;
-            max-width: 300px;
-        }
-        #message .start-button {
-            margin-top: 15px;
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: transparent;
-            border: 1px solid #ffffff;
-            border-radius: 3px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 1em;
-        }
-        #message .start-button:hover {
-            background-color: rgba(255, 255, 255, 0.1);
+            background-color: #f5f5f5;
+            color: #333;
         }
         
-        /* CRT and Grain Effects */
-        .crt-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
-                        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            background-size: 100% 2px, 3px 100%;
-            pointer-events: none;
-            z-index: 5;
+        h1 {
+            text-align: center;
+            color: #222;
+            margin-bottom: 30px;
         }
         
-        .crt-scanline {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: repeating-linear-gradient(
-                0deg,
-                rgba(0, 0, 0, 0.15),
-                rgba(0, 0, 0, 0.15) 1px,
-                transparent 1px,
-                transparent 2px
-            );
-            pointer-events: none;
-            z-index: 4;
+        .app-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
         }
         
-        .crt-flicker {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(18, 16, 16, 0.1);
-            opacity: 0;
-            pointer-events: none;
-            z-index: 3;
-            animation: flicker 0.15s infinite alternate;
+        .upload-section {
+            flex: 1;
+            min-width: 300px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         
-        .grain {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-            opacity: 0.05;
-            pointer-events: none;
-            z-index: 2;
+        .preview-section {
+            flex: 2;
+            min-width: 400px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         
-        @keyframes flicker {
-            0% { opacity: 0.1; }
-            100% { opacity: 0; }
+        .controls {
+            margin-top: 20px;
         }
         
-        /* Game screen glow effect */
-        #game-screen {
-            color: rgba(180, 255, 180, 0.9);
-            text-shadow: 0 0 3px rgba(0, 255, 0, 0.5);
+        .control-group {
+            margin-bottom: 15px;
         }
         
-        /* Vignette Effect */
-        .vignette {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(ellipse at center, rgba(0,0,0,0) 60%, rgba(0,0,0,0.5) 100%);
-            pointer-events: none;
-            z-index: 6;
-        }
-
-        /* Improved Mute Button with Slash Effect */
-        #mute-button {
-            position: absolute;
-            bottom: 20px; /* Position relative to the game container */
-            right: 20px;
-            width: 40px;
-            height: 40px;
-            background-color: transparent;
-            border: 1px solid #ffffff;
-            border-radius: 3px;
-            cursor: pointer;
-            font-family: 'Courier New', monospace;
+        label {
+            display: block;
+            margin-bottom: 5px;
             font-weight: bold;
-            color: white;
-            text-shadow: 0 0 5px rgba(0, 255, 0, 0.7);
-            z-index: 10;
-            transition: all 0.3s;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+        }
+        
+        .checkbox-control {
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            line-height: 1;
+            margin-bottom: 10px;
         }
         
-        #mute-button:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-            transform: scale(1.1);
+        .checkbox-control input {
+            margin-right: 10px;
         }
-
-        #mute-button:active {
-            transform: scale(0.95);
-        }
-
-        /* Slash effect for muted state */
-        #mute-button.muted::after {
-            content: '/';
-            position: absolute;
-            font-size: 24px;
+        
+        button {
+            background-color: #4CAF50;
             color: white;
-            transform: rotate(-45deg);
-            text-shadow: 0 0 5px rgba(255, 0, 0, 0.7);
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
         }
-
-        /* Pulse animation for the mute button */
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
+        
+        button:hover {
+            background-color: #45a049;
         }
-
-        .pulse {
-            animation: pulse 2s infinite;
+        
+        #fileInput {
+            display: none;
+        }
+        
+        .upload-area {
+            border: 2px dashed #ccc;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+        
+        .upload-area:hover {
+            background: #f0f0f0;
+        }
+        
+        .preview-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            border: 1px solid #ddd;
+            margin-bottom: 20px;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f9f9f9;
+        }
+        
+        #previewImage {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        
+        .download-btn {
+            background-color: #2196F3;
+        }
+        
+        .download-btn:hover {
+            background-color: #0b7dda;
+        }
+        
+        .value-display {
+            display: inline-block;
+            width: 40px;
+            text-align: right;
+            margin-left: 10px;
+        }
+        
+        .effect-presets {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .preset-btn {
+            background-color: #607d8b;
+            padding: 5px 10px;
+            font-size: 14px;
+        }
+        
+        .preset-btn:hover {
+            background-color: #455a64;
         }
     </style>
 </head>
 <body>
-    <div id="game-container">
-        <div id="header">
-            <div id="title">ASCII-BIRD</div>
-            <div id="scores">SCORE: 0 | HIGH: 0</div>
-        </div>
-        <div id="game-screen"></div>
-        <div id="message">
-            CLICK TO START
-            <div class="start-button">PLAY</div>
+    <h1>Distressed Photo Effects</h1>
+    
+    <div class="app-container">
+        <div class="upload-section">
+            <div class="upload-area" id="uploadArea">
+                <p>Click to upload an image (JPEG or PNG)</p>
+                <input type="file" id="fileInput" accept="image/jpeg, image/png">
+            </div>
+            
+            <div class="controls">
+                <h3>Distress Effects</h3>
+                
+                <div class="control-group">
+                    <label for="scratches">Scratches <span class="value-display" id="scratchesValue">50</span></label>
+                    <input type="range" id="scratches" min="0" max="100" value="50">
+                </div>
+                
+                <div class="control-group">
+                    <label for="noise">Noise <span class="value-display" id="noiseValue">30</span></label>
+                    <input type="range" id="noise" min="0" max="100" value="30">
+                </div>
+                
+                <div class="control-group">
+                    <label for="fade">Fade <span class="value-display" id="fadeValue">20</span></label>
+                    <input type="range" id="fade" min="0" max="100" value="20">
+                </div>
+                
+                <div class="control-group">
+                    <label for="texture">Texture <span class="value-display" id="textureValue">40</span></label>
+                    <input type="range" id="texture" min="0" max="100" value="40">
+                </div>
+                
+                <div class="control-group">
+                    <label for="vignette">Vignette <span class="value-display" id="vignetteValue">25</span></label>
+                    <input type="range" id="vignette" min="0" max="100" value="25">
+                </div>
+                
+                <div class="checkbox-control">
+                    <input type="checkbox" id="sepia" checked>
+                    <label for="sepia">Sepia Tone</label>
+                </div>
+                
+                <div class="checkbox-control">
+                    <input type="checkbox" id="border">
+                    <label for="border">Add Border</label>
+                </div>
+                
+                <h3>Effect Presets</h3>
+                <div class="effect-presets">
+                    <button class="preset-btn" data-preset="light">Light Distress</button>
+                    <button class="preset-btn" data-preset="medium">Medium Distress</button>
+                    <button class="preset-btn" data-preset="heavy">Heavy Distress</button>
+                    <button class="preset-btn" data-preset="vintage">Vintage</button>
+                    <button class="preset-btn" data-preset="grunge">Grunge</button>
+                </div>
+                
+                <button id="resetBtn">Reset Effects</button>
+            </div>
         </div>
         
-        <!-- CRT Effect Overlays -->
-        <div class="crt-overlay"></div>
-        <div class="crt-scanline"></div>
-        <div class="crt-flicker"></div>
-        <div class="grain"></div>
-        <div class="vignette"></div>
-
-        <!-- Mute Button with ASCII Icon -->
-        <button id="mute-button">♫</button>
+        <div class="preview-section">
+            <div class="preview-container">
+                <img id="previewImage" style="display: none;">
+                <canvas id="previewCanvas"></canvas>
+            </div>
+            
+            <button id="downloadBtn" class="download-btn">Download Processed Image</button>
+        </div>
     </div>
 
     <script>
-        // Game characters
-        const PLAYER_BIRD = ['>ᴗ<', '>(ᴗ)<'];  // Bird animation frames - new cute birdie
-        const OBSTACLE_PIPE_TOP = ['╔═╗', '║░║', '║▒║', '║▓║', '║█║'];  // Top pipe texture (varied)
-        const OBSTACLE_PIPE_BODY = ['║░║', '║▒║', '║▓║', '║█║', '║░║'];  // Pipe body texture (varied)
-        const OBSTACLE_PIPE_CAP = '╚═╝';  // Bottom cap of top pipe
-        const OBSTACLE_PIPE_TOP_CAP = '╔═╗';  // Top cap of bottom pipe
-        
-        // Improved ground with more variety
-        const TERRAIN_GROUND = ['▁', '▂', '▃', '▄', '▅', '▆', '▇', '█', '▆', '▅', '▄', '▃'];
-        const TERRAIN_PATTERN = ['~', '‿', '︵', '.', '˙', '⌣'];
-        
-        // ASCII icons for sound state
-        const SOUND_ON_ICON = '♫';
-        const SOUND_OFF_ICON = '♩';
-        
-        const EMPTY_SKY = ' ';  // Sky remains empty
-        
-        // Game state
-        let canvasWidth, canvasHeight;
-        let player = { 
-            position: { x: 0, y: 0 }, 
-            jumpVelocity: 0 
-        };
-        let obstacles = [];
-        let tick = 0;
-        let playerScore = 0;
-        let bestScore = 0;
-        let isGameActive = false;
-        let isGameEnded = false;
-        let gameRefreshRate = 50; // Milliseconds between frames
-        let gameSpeed = 1; // Base game speed multiplier
-        
-        // Web Audio API setup
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        let isMuted = false;
-
-        // Function to generate a bleep sound
-        function playBleep() {
-            if (isMuted) return;
-
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-
-            // Configure the oscillator
-            oscillator.type = 'sine'; // Softer sound
-            oscillator.frequency.setValueAtTime(440, audioContext.currentTime); // Higher frequency for better audibility
-
-            // Configure the gain (volume)
-            gainNode.gain.setValueAtTime(0.5, audioContext.currentTime); // Increased volume
-            gainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.1); // Fade out quickly
-
-            // Connect the oscillator to the gain node and the gain node to the audio context's destination
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-
-            // Start and stop the oscillator
-            oscillator.start();
-            oscillator.stop(audioContext.currentTime + 0.1); // Stop after 0.1 seconds
-        }
-
-        // Function to generate a blorp sound
-        function playBlorp() {
-            if (isMuted) return;
-
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-
-            // Configure the oscillator
-            oscillator.type = 'triangle'; // Softer sound
-            oscillator.frequency.setValueAtTime(220, audioContext.currentTime); // Lower frequency for blorp
-
-            // Configure the gain (volume)
-            gainNode.gain.setValueAtTime(0.8, audioContext.currentTime); // Increased volume
-            gainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.3); // Fade out slowly
-
-            // Connect the oscillator to the gain node and the gain node to the audio context's destination
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-
-            // Start and stop the oscillator
-            oscillator.start();
-            oscillator.stop(audioContext.currentTime + 0.3); // Stop after 0.3 seconds
-        }
-
-        // Safe localStorage wrapper function
-        function safeLocalStorage() {
-            let data = {};
-            
-            try {
-                // Test if localStorage is available
-                localStorage.setItem('test', 'test');
-                localStorage.removeItem('test');
-                
-                return {
-                    getItem: (key) => localStorage.getItem(key),
-                    setItem: (key, value) => localStorage.setItem(key, value)
-                };
-            } catch (e) {
-                // Fallback to memory storage if localStorage isn't available
-                console.warn('localStorage not available, using memory storage instead');
-                return {
-                    getItem: (key) => data[key] || null,
-                    setItem: (key, value) => { data[key] = value; }
-                };
-            }
-        }
-
-        // Initialize using the safe localStorage wrapper
-        const storage = safeLocalStorage();
-        bestScore = storage.getItem('asciibird-highscore') 
-            ? parseInt(storage.getItem('asciibird-highscore')) 
-            : 0;
-        
         // DOM elements
-        const gameCanvas = document.getElementById('game-screen');
-        const gameMessage = document.getElementById('message');
-        const scoreDisplay = document.getElementById('scores');
-        const muteButton = document.getElementById('mute-button');
+        const fileInput = document.getElementById('fileInput');
+        const uploadArea = document.getElementById('uploadArea');
+        const previewImage = document.getElementById('previewImage');
+        const previewCanvas = document.getElementById('previewCanvas');
+        const ctx = previewCanvas.getContext('2d');
         
-        // Mute button functionality with slash effect
-        muteButton.addEventListener('click', () => {
-            isMuted = !isMuted;
+        // Control elements
+        const scratchesSlider = document.getElementById('scratches');
+        const noiseSlider = document.getElementById('noise');
+        const fadeSlider = document.getElementById('fade');
+        const textureSlider = document.getElementById('texture');
+        const vignetteSlider = document.getElementById('vignette');
+        const sepiaCheckbox = document.getElementById('sepia');
+        const borderCheckbox = document.getElementById('border');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const presetBtns = document.querySelectorAll('.preset-btn');
+        
+        // Value displays
+        const scratchesValue = document.getElementById('scratchesValue');
+        const noiseValue = document.getElementById('noiseValue');
+        const fadeValue = document.getElementById('fadeValue');
+        const textureValue = document.getElementById('textureValue');
+        const vignetteValue = document.getElementById('vignetteValue');
+        
+        // State variables
+        let originalImage = null;
+        let textureImage = null;
+        
+        // Load a default texture
+        function createDefaultTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 512;
+            const textureCtx = canvas.getContext('2d');
             
-            // Toggle the muted class for the slash effect
-            muteButton.classList.toggle('muted', isMuted);
+            // Create a simple noise texture
+            const imageData = textureCtx.createImageData(canvas.width, canvas.height);
+            const data = imageData.data;
             
-            // Add pulse animation on toggle
-            muteButton.classList.add('pulse');
-            setTimeout(() => {
-                muteButton.classList.remove('pulse');
-            }, 1000);
-            
-            // If we're turning sound back on, play a small confirmation sound
-            if (!isMuted) {
-                playBleep();
+            for (let i = 0; i < data.length; i += 4) {
+                const value = Math.random() * 255;
+                data[i] = value;     // R
+                data[i + 1] = value; // G
+                data[i + 2] = value; // B
+                data[i + 3] = 255;   // A
             }
+            
+            textureCtx.putImageData(imageData, 0, 0);
+            return canvas;
+        }
+        
+        // Initialize
+        textureImage = createDefaultTexture();
+        
+        // Event listeners
+        uploadArea.addEventListener('click', () => fileInput.click());
+        
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                originalImage = new Image();
+                originalImage.onload = () => {
+                    previewImage.src = event.target.result;
+                    previewImage.style.display = 'block';
+                    updateCanvasSize();
+                    applyEffects();
+                };
+                originalImage.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
         });
-
-        // Initialize the game dimensions
-        function updateGameDimensions() {
-            resizeGameCanvas();
-            // If game is running, render the updated game world
-            if (isGameActive) {
-                renderGameWorld();
+        
+        // Update slider value displays
+        scratchesSlider.addEventListener('input', () => {
+            scratchesValue.textContent = scratchesSlider.value;
+            applyEffects();
+        });
+        
+        noiseSlider.addEventListener('input', () => {
+            noiseValue.textContent = noiseSlider.value;
+            applyEffects();
+        });
+        
+        fadeSlider.addEventListener('input', () => {
+            fadeValue.textContent = fadeSlider.value;
+            applyEffects();
+        });
+        
+        textureSlider.addEventListener('input', () => {
+            textureValue.textContent = textureSlider.value;
+            applyEffects();
+        });
+        
+        vignetteSlider.addEventListener('input', () => {
+            vignetteValue.textContent = vignetteSlider.value;
+            applyEffects();
+        });
+        
+        sepiaCheckbox.addEventListener('change', applyEffects);
+        borderCheckbox.addEventListener('change', applyEffects);
+        
+        // Preset buttons
+        presetBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const preset = btn.dataset.preset;
+                applyPreset(preset);
+            });
+        });
+        
+        // Reset button
+        resetBtn.addEventListener('click', () => {
+            scratchesSlider.value = 50;
+            noiseSlider.value = 30;
+            fadeSlider.value = 20;
+            textureSlider.value = 40;
+            vignetteSlider.value = 25;
+            sepiaCheckbox.checked = true;
+            borderCheckbox.checked = false;
+            
+            scratchesValue.textContent = '50';
+            noiseValue.textContent = '30';
+            fadeValue.textContent = '20';
+            textureValue.textContent = '40';
+            vignetteValue.textContent = '25';
+            
+            applyEffects();
+        });
+        
+        // Download button
+        downloadBtn.addEventListener('click', () => {
+            if (!originalImage) return;
+            
+            const link = document.createElement('a');
+            link.download = 'distressed-image.png';
+            link.href = previewCanvas.toDataURL('image/png');
+            link.click();
+        });
+        
+        // Update canvas size to match image
+        function updateCanvasSize() {
+            if (!originalImage) return;
+            
+            previewCanvas.width = originalImage.width;
+            previewCanvas.height = originalImage.height;
+        }
+        
+        // Apply preset configurations
+        function applyPreset(preset) {
+            switch (preset) {
+                case 'light':
+                    scratchesSlider.value = 30;
+                    noiseSlider.value = 20;
+                    fadeSlider.value = 15;
+                    textureSlider.value = 25;
+                    vignetteSlider.value = 15;
+                    sepiaCheckbox.checked = true;
+                    break;
+                case 'medium':
+                    scratchesSlider.value = 60;
+                    noiseSlider.value = 40;
+                    fadeSlider.value = 30;
+                    textureSlider.value = 50;
+                    vignetteSlider.value = 30;
+                    sepiaCheckbox.checked = true;
+                    break;
+                case 'heavy':
+                    scratchesSlider.value = 85;
+                    noiseSlider.value = 60;
+                    fadeSlider.value = 50;
+                    textureSlider.value = 75;
+                    vignetteSlider.value = 40;
+                    sepiaCheckbox.checked = true;
+                    break;
+                case 'vintage':
+                    scratchesSlider.value = 40;
+                    noiseSlider.value = 50;
+                    fadeSlider.value = 70;
+                    textureSlider.value = 60;
+                    vignetteSlider.value = 50;
+                    sepiaCheckbox.checked = true;
+                    break;
+                case 'grunge':
+                    scratchesSlider.value = 70;
+                    noiseSlider.value = 80;
+                    fadeSlider.value = 40;
+                    textureSlider.value = 90;
+                    vignetteSlider.value = 60;
+                    sepiaCheckbox.checked = false;
+                    break;
+            }
+            
+            // Update value displays
+            scratchesValue.textContent = scratchesSlider.value;
+            noiseValue.textContent = noiseSlider.value;
+            fadeValue.textContent = fadeSlider.value;
+            textureValue.textContent = textureSlider.value;
+            vignetteValue.textContent = vignetteSlider.value;
+            
+            applyEffects();
+        }
+        
+        // Main function to apply all effects
+        function applyEffects() {
+            if (!originalImage) return;
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+            
+            // Draw original image
+            ctx.drawImage(originalImage, 0, 0);
+            
+            // Apply effects based on slider values
+            const scratchesIntensity = scratchesSlider.value / 100;
+            const noiseIntensity = noiseSlider.value / 100;
+            const fadeIntensity = fadeSlider.value / 100;
+            const textureIntensity = textureSlider.value / 100;
+            const vignetteIntensity = vignetteSlider.value / 100;
+            const useSepia = sepiaCheckbox.checked;
+            const useBorder = borderCheckbox.checked;
+            
+            // Get image data
+            const imageData = ctx.getImageData(0, 0, previewCanvas.width, previewCanvas.height);
+            const data = imageData.data;
+            
+            // Apply fade effect
+            if (fadeIntensity > 0) {
+                for (let i = 0; i < data.length; i += 4) {
+                    // Reduce contrast
+                    const r = data[i];
+                    const g = data[i + 1];
+                    const b = data[i + 2];
+                    
+                    const avg = (r + g + b) / 3;
+                    const fadeAmount = fadeIntensity * 0.5;
+                    
+                    data[i] = r + (avg - r) * fadeAmount;
+                    data[i + 1] = g + (avg - g) * fadeAmount;
+                    data[i + 2] = b + (avg - b) * fadeAmount;
+                }
+            }
+            
+            // Apply sepia tone
+            if (useSepia) {
+                for (let i = 0; i < data.length; i += 4) {
+                    const r = data[i];
+                    const g = data[i + 1];
+                    const b = data[i + 2];
+                    
+                    data[i] = Math.min(255, (r * 0.393) + (g * 0.769) + (b * 0.189));
+                    data[i + 1] = Math.min(255, (r * 0.349) + (g * 0.686) + (b * 0.168));
+                    data[i + 2] = Math.min(255, (r * 0.272) + (g * 0.534) + (b * 0.131));
+                }
+            }
+            
+            // Apply noise
+            if (noiseIntensity > 0) {
+                for (let i = 0; i < data.length; i += 4) {
+                    const noise = (Math.random() - 0.5) * 255 * noiseIntensity;
+                    data[i] += noise;
+                    data[i + 1] += noise;
+                    data[i + 2] += noise;
+                }
+            }
+            
+            // Put the modified image data back
+            ctx.putImageData(imageData, 0, 0);
+            
+            // Apply texture overlay
+            if (textureIntensity > 0 && textureImage) {
+                ctx.globalCompositeOperation = 'overlay';
+                ctx.globalAlpha = textureIntensity * 0.5;
+                ctx.drawImage(textureImage, 0, 0, previewCanvas.width, previewCanvas.height);
+                ctx.globalAlpha = 1.0;
+                ctx.globalCompositeOperation = 'source-over';
+            }
+            
+            // Apply scratches
+            if (scratchesIntensity > 0) {
+                addScratches(scratchesIntensity);
+            }
+            
+            // Apply vignette
+            if (vignetteIntensity > 0) {
+                addVignette(vignetteIntensity);
+            }
+            
+            // Add border if selected
+            if (useBorder) {
+                addBorder();
             }
         }
         
-        // Initialize the game world
-        function startNewGame() {
-            // Set up the game canvas dimensions
-            resizeGameCanvas();
+        // Add scratch effects
+        function addScratches(intensity) {
+            const scratchCount = Math.floor(10 + intensity * 40);
+            const maxLength = Math.max(previewCanvas.width, previewCanvas.height) * 0.3;
+            const minLength = maxLength * 0.2;
             
-            // Position the player bird
-            player.position.x = Math.floor(canvasWidth / 4);
-            player.position.y = Math.floor(canvasHeight / 2);
-            player.jumpVelocity = 0;
+            ctx.save();
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.lineWidth = 1 + intensity * 3;
             
-            // Clear any existing obstacles
-            obstacles = [];
-            
-            // Reset game progress
-            playerScore = 0;
-            gameSpeed = 1;
-            gameRefreshRate = 50;
-            updateScoreDisplay();
-            
-            // Hide the message
-            gameMessage.style.display = 'none';
-            
-            // Begin the game cycle
-            if (!isGameActive) {
-                isGameActive = true;
-                isGameEnded = false;
-                runGameLoop();
+            for (let i = 0; i < scratchCount; i++) {
+                // Random position and angle
+                const x = Math.random() * previewCanvas.width;
+                const y = Math.random() * previewCanvas.height;
+                const angle = Math.random() * Math.PI * 2;
+                const length = minLength + Math.random() * (maxLength - minLength);
+                
+                // Draw scratch
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.lineTo(
+                    x + Math.cos(angle) * length,
+                    y + Math.sin(angle) * length
+                );
+                
+                // Vary opacity
+                ctx.globalAlpha = 0.1 + Math.random() * 0.3 * intensity;
+                ctx.stroke();
             }
+            
+            // Add some dark scratches too
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
+            
+            for (let i = 0; i < scratchCount / 2; i++) {
+                const x = Math.random() * previewCanvas.width;
+                const y = Math.random() * previewCanvas.height;
+                const angle = Math.random() * Math.PI * 2;
+                const length = minLength + Math.random() * (maxLength - minLength);
+                
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.lineTo(
+                    x + Math.cos(angle) * length,
+                    y + Math.sin(angle) * length
+                );
+                
+                ctx.globalAlpha = 0.1 + Math.random() * 0.2 * intensity;
+                ctx.stroke();
+            }
+            
+            ctx.restore();
         }
         
-        // Handle screen size changes
-        function resizeGameCanvas() {
-            // Determine optimal text size for current screen
-            const fontSize = window.innerWidth < 768 ? 14 : 16;
-            canvasWidth = Math.floor(window.innerWidth / (fontSize * 0.6));
-            canvasHeight = Math.floor(window.innerHeight / fontSize) - 2; // Leave space for header
+        // Add vignette effect
+        function addVignette(intensity) {
+            const gradient = ctx.createRadialGradient(
+                previewCanvas.width / 2,
+                previewCanvas.height / 2,
+                Math.min(previewCanvas.width, previewCanvas.height) * 0.4,
+                previewCanvas.width / 2,
+                previewCanvas.height / 2,
+                Math.min(previewCanvas.width, previewCanvas.height) * 0.8
+            );
             
-            // Ensure minimum playable area
-            canvasWidth = Math.max(canvasWidth, 20);
-            canvasHeight = Math.max(canvasHeight, 10);
+            gradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
+            gradient.addColorStop(1, `rgba(0, 0, 0, ${intensity * 0.5})`);
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, previewCanvas.width, previewCanvas.height);
+        }
+        
+        // Add border
+        function addBorder() {
+            ctx.strokeStyle = 'rgba(100, 70, 50, 0.8)';
+            ctx.lineWidth = 10;
+            ctx.strokeRect(5, 5, previewCanvas.width - 10, previewCanvas.height - 10);
+            
+            // Inner border
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(15, 15, previewCanvas.width - 30, previewCanvas.height - 30);
         }
         
         // Handle window resize
         window.addEventListener('resize', () => {
-            updateGameDimensions();
-        });
-        
-        // Render the game world
-        function renderGameWorld() {
-            let displayBuffer = '';
-            
-            // Build the visual representation row by row
-            for (let y = 0; y < canvasHeight; y++) {
-                for (let x = 0; x < canvasWidth; x++) {
-                    // Draw the ground at the bottom with improved texture
-                    if (y === canvasHeight - 1) {
-                        // Create more interesting ground texture with patterns
-                        if ((x + tick) % 3 === 0) {
-                            const patternIndex = Math.floor((x + tick/2) % TERRAIN_PATTERN.length);
-                            displayBuffer += TERRAIN_PATTERN[patternIndex];
-                        } else {
-                            const groundIndex = Math.floor((x + tick/2) % TERRAIN_GROUND.length);
-                            displayBuffer += TERRAIN_GROUND[groundIndex];
-                        }
-                    } 
-                    // Add some ground variation for the row above the ground
-                    else if (y === canvasHeight - 2 && Math.random() < 0.2) {
-                        const grassIndex = Math.floor(Math.random() * 2);
-                        displayBuffer += ['.', '\''][grassIndex];
-                    }
-                    // Draw obstacles (pipes) with more detail
-                    else if (isPipeAt(x, y)) {
-                        // Get pipe details for rendering
-                        const pipeDetails = getPipeDetailsAt(x, y);
-                        displayBuffer += pipeDetails;
-                    }
-                    // Draw the player bird with animation
-                    else if (x === player.position.x && y === Math.floor(player.position.y)) {
-                        // Animate bird based on game tick and velocity
-                        const birdFrame = (player.jumpVelocity < 0) ? 0 : 1;
-                        displayBuffer += PLAYER_BIRD[birdFrame];
-                    }
-                    // Fill remaining space with sky (occasionally add stars or clouds)
-                    else {
-                        if (Math.random() < 0.0005) {
-                            displayBuffer += ['·', '*', '°'][Math.floor(Math.random() * 3)];
-                        } else {
-                            displayBuffer += EMPTY_SKY;
-                        }
-                    }
-                }
-                // End of row
-                displayBuffer += '\n';
+            if (originalImage) {
+                updateCanvasSize();
+                applyEffects();
             }
-            
-            // Update the visual display
-            gameCanvas.textContent = displayBuffer;
-        }
-        
-        // Get detailed pipe textures for a specific position
-        function getPipeDetailsAt(x, y) {
-            for (const obstacle of obstacles) {
-                if (x === obstacle.x) {
-                    // Top pipe section
-                    if (y < obstacle.gapStart) {
-                        // If at the bottom of top pipe (cap)
-                        if (y === obstacle.gapStart - 1) {
-                            return OBSTACLE_PIPE_CAP;
-                        }
-                        // If at the top edge of the screen (top cap)
-                        else if (y === 0) {
-                            return OBSTACLE_PIPE_TOP[0];
-                        }
-                        // Pipe body with varied texture based on position
-                        else {
-                            const textureIndex = (y + x) % OBSTACLE_PIPE_BODY.length;
-                            return OBSTACLE_PIPE_BODY[textureIndex];
-                        }
-                    }
-                    // Bottom pipe section
-                    else if (y > obstacle.gapStart + obstacle.gapSize) {
-                        // If at the top of bottom pipe (cap)
-                        if (y === obstacle.gapStart + obstacle.gapSize + 1) {
-                            return OBSTACLE_PIPE_TOP_CAP;
-                        }
-                        // Pipe body with varied texture
-                        else {
-                            const textureIndex = (y + x) % OBSTACLE_PIPE_BODY.length;
-                            return OBSTACLE_PIPE_BODY[textureIndex];
-                        }
-                    }
-                }
-            }
-            return EMPTY_SKY;
-        }
-        
-        // Check if there's a pipe at the given position
-        function isPipeAt(x, y) {
-            for (const obstacle of obstacles) {
-                if (x === obstacle.x) {
-                    // Position is within pipe if it's outside the gap
-                    return y < obstacle.gapStart || y > obstacle.gapStart + obstacle.gapSize;
-                }
-            }
-            return false;
-        }
-        
-        // Update game physics and state
-        function updateGameState() {
-            // Apply gravity to player
-            player.jumpVelocity += 0.5; 
-            player.position.y += player.jumpVelocity / 5;
-            
-            // Generate new obstacles with consistent but challenging gaps
-            const baseObstacleInterval = 45; // Base interval between pipes
-            const obstacleInterval = Math.round(baseObstacleInterval / gameSpeed);
-            
-            if (tick % obstacleInterval === 0) {
-                // Set appropriate gap size based on speed (smaller as speed increases)
-                // But ensure minimum playable size
-                const minGapSize = Math.max(8 - Math.floor(gameSpeed), 5);
-                
-                // Calculate appropriate gap position
-                let gapStart;
-                
-                if (obstacles.length > 0) {
-                    // Reference the last obstacle for position continuity
-                    const lastObstacle = obstacles[obstacles.length - 1];
-                    const lastGapCenter = lastObstacle.gapStart + (lastObstacle.gapSize / 2);
-                    
-                    // Calculate max possible displacement based on physics and distance
-                    // Maximum vertical movement possible given horizontal distance and jump physics
-                    const horizontalDistance = canvasWidth - lastObstacle.x;
-                    const maxVerticalTravel = Math.min(
-                        horizontalDistance * 0.4, // Limit based on horizontal distance
-                        canvasHeight / 3 // Hard limit to prevent impossible jumps
-                    );
-                    
-                    // Apply controlled randomness within physically possible range
-                    const verticalShift = (Math.random() * (maxVerticalTravel * 2)) - maxVerticalTravel;
-                    
-                    // Calculate new gap center position
-                    let newGapCenter = lastGapCenter + verticalShift;
-                    
-                    // Ensure gap is within bounds
-                    newGapCenter = Math.max(
-                        minGapSize / 2 + 1, // Keep gap away from top edge
-                        Math.min(
-                            newGapCenter,
-                            canvasHeight - (minGapSize / 2) - 2 // Keep gap away from bottom edge
-                        )
-                    );
-                    
-                    // Set the final gap start position
-                    gapStart = Math.floor(newGapCenter - (minGapSize / 2));
-                } else {
-                    // First obstacle - position near the middle with slight randomness
-                    const middlePosition = Math.floor(canvasHeight / 2) - Math.floor(minGapSize / 2);
-                    gapStart = middlePosition + Math.floor(Math.random() * 5) - 2; // Small random variance
-                }
-                
-                // Final bounds check to avoid the gap being too close to edges
-                gapStart = Math.max(1, Math.min(gapStart, canvasHeight - minGapSize - 2));
-                
-                // Add the new obstacle
-                obstacles.push({
-                    x: canvasWidth,
-                    gapStart: gapStart,
-                    gapSize: minGapSize,
-                    passed: false
-                });
-            }
-            
-            // Move and process all obstacles
-            for (let i = 0; i < obstacles.length; i++) {
-                const obstacle = obstacles[i];
-                
-                // Speed increases with gameSpeed but maintains consistent movement
-                obstacle.x -= Math.ceil(gameSpeed);
-                
-                // Award points for successful navigation
-                if (!obstacle.passed && obstacle.x < player.position.x) {
-                    obstacle.passed = true;
-                    playerScore++;
-                    updateScoreDisplay();
-                    
-                    // More gradual speed increase
-                    if (playerScore > 0 && playerScore % 50 === 0) {
-                        // Very small speed increment
-                        gameSpeed = Math.min(gameSpeed + 0.05, 1.5); 
-                    }
-                }
-                
-                // Remove obstacles that have moved offscreen
-                if (obstacle.x < -1) { // Adjust to -1 to ensure smooth exit
-                    obstacles.splice(i, 1);
-                    i--;
-                }
-            }
-            
-            // Detect collisions
-            if (detectCollision()) {
-                isGameActive = false;
-                isGameEnded = true;
-                
-                // Play blorp sound on collision
-                playBlorp();
-                
-                // Update high score if needed
-                if (playerScore > bestScore) {
-                    bestScore = playerScore;
-                    storage.setItem('asciibird-highscore', bestScore);
-                    updateScoreDisplay();
-                }
-                
-                // Show end-game message with fixed spacing
-                gameMessage.innerHTML = 'GAME OVER<div class="start-button">PLAY AGAIN</div>';
-                gameMessage.style.display = 'block';
-            }
-            
-            tick++;
-        }
-        
-        // Detect player collisions with obstacles or boundaries
-        function detectCollision() {
-            const playerY = Math.floor(player.position.y);
-            
-            // Check for ground collision
-            if (playerY >= canvasHeight - 1) {
-                return true;
-            }
-            
-            // Check for ceiling collision
-            if (playerY < 0) {
-                return true;
-            }
-            
-            // Check for obstacle collisions with better hit detection
-            for (const obstacle of obstacles) {
-                // Bird hitbox (slightly more forgiving)
-                if (obstacle.x === player.position.x) {
-                    // Check if player is outside the gap (collision)
-                    if (playerY < obstacle.gapStart || playerY > obstacle.gapStart + obstacle.gapSize) {
-                        return true;
-                    }
-                }
-            }
-            
-            // No collisions detected
-            return false;
-        }
-        
-        // Update the score display
-        function updateScoreDisplay() {
-            scoreDisplay.textContent = `SCORE: ${playerScore} | HIGH: ${bestScore}`;
-        }
-        
-        // Main game loop
-        function runGameLoop() {
-            if (!isGameActive) return;
-            
-            updateGameState();
-            renderGameWorld();
-            
-            // Schedule next frame with consistent timing
-            setTimeout(() => {
-                requestAnimationFrame(runGameLoop);
-            }, gameRefreshRate);
-        }
-        
-        // Handle input (click/tap/keyboard)
-        function handleInput() {
-            // Play the bleep sound
-            playBleep();
-
-            // Make the bird jump by giving it upward velocity
-            player.jumpVelocity = -3.5;
-            
-            // Start the game if it's not active yet
-            if (!isGameActive && !isGameEnded) {
-                startNewGame();
-            }
-            // Restart the game if it ended
-            else if (isGameEnded) {
-                startNewGame();
-            }
-        }
-        
-        // Add event listeners for different input methods
-        window.addEventListener('mousedown', handleInput);
-        window.addEventListener('touchstart', (e) => {
-            e.preventDefault(); // Prevent scrolling
-            handleInput();
-        });
-        window.addEventListener('keydown', (e) => {
-            // Allow using space, up arrow, or enter to jump
-            if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'Enter') {
-                e.preventDefault();
-                handleInput();
-            }
-        });
-        
-        // Initialize the game when page loads
-        window.addEventListener('load', () => {
-            updateGameDimensions();
-            renderGameWorld();
-            
-            // Show ready message with minimalist button
-            gameMessage.innerHTML = 'CLICK TO START<div class="start-button">PLAY</div>';
-            gameMessage.style.display = 'block';
         });
     </script>
 </body>
