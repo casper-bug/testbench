@@ -2,927 +2,573 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FilmFX - Film Simulations</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <title>StealthBunk V2</title>
     <style>
-        :root {
-            --primary: #e67e22;
-            --primary-light: #f39c12;
-            --primary-dark: #d35400;
-            --secondary: #e74c3c;
-            --accent: #f1c40f;
-            --text: #f5f5f5;
-            --text-dark: #2c3e50;
-            --bg: #2c3e50;
-            --bg-light: #34495e;
-            --bg-lighter: #3d566e;
-            --border: rgba(255, 255, 255, 0.1);
-            --glass: rgba(52, 73, 94, 0.7);
-            --glass-light: rgba(74, 95, 116, 0.5);
-            --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            --shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.2);
-            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            --transition-fast: all 0.15s ease-out;
-            --border-radius: 12px;
-            --border-radius-sm: 6px;
-        }
+       /* Main theme colors */
+:root {
+    --bg-primary: #121212;
+    --bg-secondary: #1e1e1e;
+    --bg-tertiary: #252525;
+    --text-primary: #e0e0e0;
+    --text-secondary: #b0b0b0;
+    --accent-primary: #6200ee;
+    --accent-secondary: #bb86fc;
+    --error: #cf6679;
+    --success: #03dac6;
+    --warning: #ffab40;
+    --card-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+    --border-color: #3d3d3d;
+}
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+/* Base styles */
+body {
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    transition: all 0.3s ease;
+}
 
-        body {
-            font-family: 'Space Mono', monospace;
-            background-color: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-            min-height: 100vh;
-            padding: 20px;
-            background-image: 
-                radial-gradient(circle at 25% 25%, var(--primary-dark) 0%, transparent 50%),
-                radial-gradient(circle at 75% 75%, var(--secondary) 0%, transparent 50%);
-            background-attachment: fixed;
-            overflow-x: hidden;
-        }
+.container {
+    max-width: 1200px;
+    margin: 20px auto;
+    background: var(--bg-secondary);
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: var(--card-shadow);
+}
 
-        h1, h2, h3 {
-            font-weight: 700;
-            letter-spacing: -0.05em;
-        }
+h1, h2, h3 {
+    color: var(--text-primary);
+    margin-bottom: 20px;
+    font-weight: 600;
+}
 
-        h1 {
-            font-size: 2.5rem;
-            background: linear-gradient(90deg, var(--primary-light), var(--accent));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            text-align: center;
-            margin-bottom: 2rem;
-            text-shadow: 0 2px 10px rgba(230, 126, 34, 0.3);
-        }
+h1 {
+    font-size: 2.5rem;
+    background: linear-gradient(90deg, var(--accent-secondary), var(--accent-primary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin-bottom: 30px;
+}
 
-        .app-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            max-width: 1400px;
-            margin: 0 auto;
-            perspective: 1000px;
-        }
+h2 {
+    font-size: 1.8rem;
+    color: var(--accent-secondary);
+    margin-top: 30px;
+}
 
-        .panel {
-            flex: 1;
-            min-width: 300px;
-            background: var(--glass);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-radius: var(--border-radius);
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow);
-            padding: 24px;
-            transition: var(--transition);
-            transform-style: preserve-3d;
-        }
+h3 {
+    font-size: 1.3rem;
+    border-bottom: 1px solid var(--bg-tertiary);
+    padding-bottom: 10px;
+}
 
-        .panel:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--shadow-sm);
-        }
+button {
+    background: var(--accent-primary);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin: 5px 5px 5px 0;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
 
-        .preview-section {
-            display: flex;
-            flex-direction: column;
-            min-height: 600px;
-        }
+button:hover {
+    background: var(--accent-secondary);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
 
-        .controls {
-            margin-top: 20px;
-        }
+.result {
+    margin-top: 20px;
+    padding: 20px;
+    background: var(--bg-tertiary);
+    border-radius: 12px;
+    border-left: 5px solid var(--accent-primary);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
 
-        .control-group {
-            margin-bottom: 1.5rem;
-            position: relative;
-        }
+/* Subject entries */
+.subject-entry {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+    background: var(--bg-tertiary);
+    padding: 15px;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
 
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-size: 0.9rem;
-            color: var(--text);
-            opacity: 0.8;
-            letter-spacing: 0.05em;
-        }
+.subject-entry:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
 
-        input[type="range"] {
-            -webkit-appearance: none;
-            width: 100%;
-            height: 6px;
-            background: var(--bg-lighter);
-            border-radius: 3px;
-            outline: none;
-            margin: 10px 0;
-            transition: var(--transition-fast);
-        }
+.subject-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
 
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: var(--primary);
-            cursor: pointer;
-            box-shadow: 0 0 10px rgba(230, 126, 34, 0.5);
-            transition: var(--transition-fast);
-        }
+.add-subject-btn {
+    background: var(--success);
+}
 
-        input[type="range"]::-webkit-slider-thumb:hover {
-            transform: scale(1.2);
-            background: var(--primary-light);
-        }
+.remove-subject-btn {
+    background: var(--error);
+    padding: 6px 10px;
+    margin: 0;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
-        input[type="range"]:active::-webkit-slider-thumb {
-            transform: scale(1.1);
-        }
+.small-input {
+    width: 60px;
+    padding: 8px;
+    margin: 0 5px;
+    max-width: 100%;
+}
 
-        .checkbox-control {
-            display: flex;
-            align-items: center;
-            margin-bottom: 1rem;
-            cursor: pointer;
-            user-select: none;
-            transition: var(--transition-fast);
-        }
+.color-indicator {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
 
-        .checkbox-control:hover {
-            opacity: 0.9;
-        }
+/* Status indicators */
+.bunk-status {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    margin-left: 5px;
+    font-weight: 500;
+}
 
-        .checkbox-control input {
-            position: absolute;
-            opacity: 0;
-            cursor: pointer;
-            height: 0;
-            width: 0;
-        }
+.can-bunk-status {
+    background: rgba(3, 218, 198, 0.2);
+    color: var(--success);
+}
 
-        .checkmark {
-            position: relative;
-            height: 20px;
-            width: 20px;
-            background-color: var(--bg-lighter);
-            border-radius: var(--border-radius-sm);
-            margin-right: 10px;
-            border: 1px solid var(--border);
-            transition: var(--transition-fast);
-        }
+.cannot-bunk-status {
+    background: rgba(207, 102, 121, 0.2);
+    color: var(--error);
+}
 
-        .checkbox-control input:checked ~ .checkmark {
-            background-color: var(--primary);
-        }
+/* Timetable styles */
+.timetable-wrapper {
+    overflow-x: auto;
+    margin: 15px 0;
+    -webkit-overflow-scrolling: touch;
+}
 
-        .checkmark:after {
-            content: "";
-            position: absolute;
-            display: none;
-            left: 7px;
-            top: 3px;
-            width: 5px;
-            height: 10px;
-            border: solid white;
-            border-width: 0 2px 2px 0;
-            transform: rotate(45deg);
-        }
+.timetable-grid {
+    width: 100%;
+    min-width: 600px;
+    border-collapse: collapse;
+    margin-top: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
 
-        .checkbox-control input:checked ~ .checkmark:after {
-            display: block;
-        }
+.timetable-grid th, .timetable-grid td {
+    text-align: center;
+    padding: 15px;
+    position: relative;
+    border: 1px solid var(--border-color);
+}
 
-        button {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: var(--border-radius-sm);
-            cursor: pointer;
-            font-family: 'Space Mono', monospace;
-            font-weight: bold;
-            font-size: 0.9rem;
-            margin-top: 10px;
-            transition: var(--transition);
-            box-shadow: 0 4px 15px rgba(230, 126, 34, 0.3);
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-            position: relative;
-            overflow: hidden;
-        }
+.timetable-grid th {
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    font-weight: 500;
+}
 
-        button:before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: var(--transition);
-        }
+.timetable-grid td {
+    height: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
 
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(230, 126, 34, 0.4);
-        }
+.timetable-grid td.can-bunk {
+    background: rgba(3, 218, 198, 0.1);
+    border-left: 3px solid var(--success);
+}
 
-        button:hover:before {
-            left: 100%;
-        }
+.timetable-grid td.cannot-bunk {
+    background: rgba(207, 102, 121, 0.1);
+    border-left: 3px solid var(--error);
+}
 
-        button:active {
-            transform: translateY(0);
-        }
+/* Fix for the checkbox container in the last column */
+.timetable-grid td:last-child {
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+}
 
-        .download-btn {
-            background: linear-gradient(135deg, var(--secondary), #c0392b);
-            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
-        }
+.bunk-checkbox-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
 
-        .download-btn:hover {
-            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
-        }
+.subject-cell {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-weight: 200;
+    font-size: 0.65rem;
+    color: rgba(50, 50, 50, 0.7);
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
 
-        #fileInput {
-            display: none;
-        }
+.subject-cell:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
 
-        .upload-area {
-            border: 2px dashed var(--border);
-            padding: 40px 20px;
-            text-align: center;
-            cursor: pointer;
-            margin-bottom: 20px;
-            border-radius: var(--border-radius);
-            transition: var(--transition);
-            position: relative;
-            background: var(--glass-light);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-        }
+/* Subject picker modal */
+.subject-picker-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
 
-        .upload-area:hover, .upload-area.dragover {
-            border-color: var(--primary);
-            background: var(--glass);
-            transform: translateY(-3px);
-        }
+.subject-picker-content {
+    background: var(--bg-secondary);
+    padding: 20px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: var(--card-shadow);
+}
 
-        .upload-area i {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            color: var(--primary);
-            transition: var(--transition);
-        }
+.subject-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin: 15px 0;
+}
 
-        .upload-area:hover i {
-            transform: scale(1.1);
-        }
+.subject-option {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 5px;
+}
 
-        .upload-text {
-            pointer-events: none;
-            margin-bottom: 0.5rem;
-        }
+.subject-option:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
 
-        .preview-container {
-            position: relative;
-            width: 100%;
-            height: 400px;
-            border-radius: var(--border-radius);
-            margin-bottom: 20px;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: var(--bg-light);
-            background-image: 
-                linear-gradient(45deg, var(--bg-lighter) 25%, transparent 25%, transparent 75%, var(--bg-lighter) 75%, var(--bg-lighter)),
-                linear-gradient(45deg, var(--bg-lighter) 25%, transparent 25%, transparent 75%, var(--bg-lighter) 75%, var(--bg-lighter));
-            background-size: 20px 20px;
-            background-position: 0 0, 10px 10px;
-            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.3);
-            transition: var(--transition);
-        }
+.subject-option .color-indicator {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
 
-        .preview-container:hover {
-            box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.4);
-        }
+.subject-option span {
+    flex-grow: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
 
-        #previewImage {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-            display: none;
-            border-radius: var(--border-radius-sm);
-        }
+.clear-subject {
+    border: 1px dashed var(--text-secondary);
+    justify-content: center;
+    color: var(--text-secondary);
+}
 
-        #previewCanvas {
-            border-radius: var(--border-radius-sm);
-        }
+/* Period controls */
+.period-controls {
+    display: flex;
+    align-items: center;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    gap: 10px;
+}
 
-        .value-display {
-            display: inline-block;
-            width: 40px;
-            text-align: right;
-            margin-left: 10px;
-            font-feature-settings: "tnum";
-            font-variant-numeric: tabular-nums;
-        }
+.period-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 20px;
+    padding: 0;
+}
 
-        select {
-            width: 100%;
-            padding: 10px;
-            border-radius: var(--border-radius-sm);
-            border: 1px solid var(--border);
-            margin-bottom: 1.5rem;
-            background: var(--bg-light);
-            color: var(--text);
-            font-family: 'Space Mono', monospace;
-            transition: var(--transition-fast);
-        }
+.period-display {
+    font-weight: 500;
+    color: var(--text-primary);
+    margin: 0 10px;
+}
 
-        select:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 2px rgba(230, 126, 34, 0.2);
-        }
+/* Checkboxes */
+input[type="checkbox"] {
+    accent-color: var(--accent-primary);
+    width: auto;
+    margin-right: 8px;
+}
 
-        /* Loading indicator */
-        .loading {
-            display: none;
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 10;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            border-radius: var(--border-radius);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
-        }
+input[type="text"], input[type="number"] {
+    padding: 8px;
+    border: 1px solid #444;
+    background: var(--bg-primary);
+    border-radius: 8px;
+    color: var(--text-primary);
+    transition: all 0.3s ease;
+    flex: 1;
+    min-width: 60px;
+}
 
-        .loading.active {
-            display: flex;
-        }
+input:focus {
+    outline: none;
+    border-color: var(--accent-secondary);
+    box-shadow: 0 0 0 2px rgba(187, 134, 252, 0.3);
+}
 
-        .spinner {
-            border: 4px solid rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            border-top: 4px solid var(--primary);
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin-bottom: 10px;
-        }
+label {
+    color: var(--text-secondary);
+    font-weight: 500;
+    margin-right: 5px;
+}
 
-        /* Animations */
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+/* Media Queries for Mobile Optimization */
+@media only screen and (max-width: 768px) {
+    h1 {
+        font-size: 2rem;
+    }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+    h2 {
+        font-size: 1.5rem;
+    }
 
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-            100% { transform: translateY(0px); }
-        }
+    .container {
+        padding: 15px;
+        margin: 10px;
+    }
 
-        /* Responsive design */
-        @media (max-width: 768px) {
-            .app-container {
-                flex-direction: column;
-            }
-            
-            .preview-container {
-                height: 300px;
-            }
-            
-            h1 {
-                font-size: 2rem;
-            }
-            
-            .panel {
-                min-width: 100%;
-            }
-        }
+    .subject-entry {
+        flex-direction: row;
+        align-items: center;
+        padding: 10px;
+        gap: 8px;
+    }
 
-        @media (max-width: 480px) {
-            .preview-container {
-                height: 250px;
-            }
-            
-            .upload-area {
-                padding: 30px 15px;
-            }
-            
-            button {
-                padding: 10px 15px;
-                font-size: 0.8rem;
-            }
-            
-            h1 {
-                font-size: 1.8rem;
-            }
-        }
+    .subject-entry input {
+        width: auto;
+        margin-bottom: 0;
+        flex: 1;
+    }
 
-        /* Aero glass effect for modern browsers */
-        @supports (backdrop-filter: blur(16px)) or (-webkit-backdrop-filter: blur(16px)) {
-            .panel, .upload-area {
-                background: var(--glass);
-                backdrop-filter: blur(16px);
-                -webkit-backdrop-filter: blur(16px);
-            }
-        }
+    .small-input {
+        width: 60px;
+        max-width: 100%;
+    }
 
-        /* Fallback for browsers that don't support backdrop-filter */
-        @supports not ((backdrop-filter: blur(16px)) or (-webkit-backdrop-filter: blur(16px))) {
-            .panel, .upload-area {
-                background: var(--bg-light);
-            }
-        }
+    .timetable-grid th, .timetable-grid td {
+        padding: 10px;
+        font-size: 12px;
+    }
+
+    .timetable-grid td {
+        height: 40px;
+    }
+
+    .subject-list {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Dark scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-primary);
+}
     </style>
 </head>
 <body>
-    <h1>FilmFX</h1>
-    
-    <div class="app-container">
-        <div class="panel upload-section">
-            <div class="upload-area" id="uploadArea">
-                <div class="loading" id="loadingIndicator">
-                    <div class="spinner"></div>
-                    <p>Processing image...</p>
+    <div class="container">
+        <div id="TimetableCalculator">
+            <h2>Timetable Calculator</h2>
+            <p>Enter your subjects and create your weekly timetable to calculate which days you can bunk.</p>
+            
+            <div class="subject-summary">
+                <h3>Subject Information</h3>
+                <div class="subject-controls">
+                    <button class="add-subject-btn" onclick="addSubject()">Add Subject</button>
+                    <input type="file" id="fileInput" accept=".xlsx,.csv,.doc,.docx" style="display: none;" onchange="handleFileUpload(event)">
+                    <button onclick="document.getElementById('fileInput').click()">Import from File</button>
                 </div>
-                <i class="fas fa-cloud-upload-alt"></i>
-                <p class="upload-text">Drag & drop an image here</p>
-                <p class="upload-text"><small>or click to browse</small></p>
-                <p class="upload-text"><small>(JPEG or PNG, max 10MB)</small></p>
-                <input type="file" id="fileInput" accept="image/jpeg, image/png">
+                
+                <div id="subjects-container">
+                    <!-- Subject entries will be added here -->
+                </div>
             </div>
             
-            <div class="controls">
-                <select id="filmType">
-                    <option value="none">No Film Simulation</option>
-                    <optgroup label="Kodak Color Negative">
-                        <option value="portra160">Portra 160</option>
-                        <option value="portra400">Portra 400</option>
-                        <option value="portra800">Portra 800</option>
-                        <option value="gold200">Gold 200</option>
-                        <option value="ultramax400">Ultramax 400</option>
-                        <option value="ektar100">Ektar 100</option>
-                    </optgroup>
-                    <optgroup label="Fujifilm Color Negative">
-                        <option value="superia400">Superia X-TRA 400</option>
-                        <option value="pro400h">Pro 400H</option>
-                        <option value="provia100f">Provia 100F</option>
-                        <option value="velvia50">Velvia 50</option>
-                        <option value="velvia100">Velvia 100</option>
-                        <option value="natura1600">Natura 1600</option>
-                    </optgroup>
-                    <optgroup label="Black & White">
-                        <option value="hp5plus">Ilford HP5 Plus</option>
-                        <option value="trix400">Kodak Tri-X 400</option>
-                        <option value="tmax100">T-Max 100</option>
-                        <option value="tmax400">T-Max 400</option>
-                        <option value="delta100">Ilford Delta 100</option>
-                        <option value="delta400">Ilford Delta 400</option>
-                        <option value="delta3200">Ilford Delta 3200</option>
-                        <option value="fomapan100">Fomapan 100</option>
-                        <option value="fomapan400">Fomapan 400</option>
-                    </optgroup>
-                    <optgroup label="Slide Film">
-                        <option value="ektachrome100">Ektachrome E100</option>
-                        <option value="vision3_250d">Vision3 250D</option>
-                        <option value="vision3_500t">Vision3 500T</option>
-                    </optgroup>
-                    <optgroup label="Specialty Films">
-                        <option value="cinestill800t">Cinestill 800T</option>
-                        <option value="cinestill50d">Cinestill 50D</option>
-                        <option value="lomopurple">Lomography Purple</option>
-                        <option value="aerochrome">Kodak Aerochrome</option>
-                        <option value="revolog">Revolog</option>
-                    </optgroup>
-                </select>
-                
-                <div class="control-group">
-                    <label for="filmStrength">Simulation Strength <span class="value-display" id="filmStrengthValue">100</span></label>
-                    <input type="range" id="filmStrength" min="0" max="100" value="100">
+            <div class="timetable-container">
+                <div class="period-controls">
+                    <button class="period-btn" onclick="adjustPeriods(-1)">-</button>
+                    <span class="period-display">Hours : <span id="period-count">7</span></span>
+                    <button class="period-btn" onclick="adjustPeriods(1)">+</button>
                 </div>
                 
-                <div class="checkbox-control">
-                    <input type="checkbox" id="filmGrain" checked>
-                    <span class="checkmark"></span>
-                    <label for="filmGrain">Include Film Grain</label>
+                <div class="timetable-wrapper">
+                    <table class="timetable-grid" id="timetable-grid">
+                        <thead>
+                            <tr id="timetable-header">
+                                <th>Day / Hours</th>
+                                <!-- Period headers will be added dynamically -->
+                                <th>Bunk Day</th>
+                            </tr>
+                        </thead>
+                        <tbody id="timetable-body">
+                            <!-- Timetable rows will be added here -->
+                        </tbody>
+                    </table>
                 </div>
-                
-                <button id="resetBtn">Reset All</button>
-            </div>
-        </div>
-        
-        <div class="panel preview-section">
-            <div class="preview-container">
-                <img id="previewImage" style="display: none;">
-                <canvas id="previewCanvas"></canvas>
             </div>
             
-            <button id="downloadBtn" class="download-btn">
-                <i class="fas fa-download"></i> Download Image
-            </button>
+            <div class="bunk-section">
+                <p>Select the days you want to bunk and see if it's safe to do so.</p>
+                <button onclick="calculateBunkPlan()">Check Bunk Plan</button>
+                <div class="result">
+                    <h3>Bunk Analysis Results:</h3>
+                    <div id="bunk-results">
+                        <!-- Bunk results will be displayed here -->
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
+    <!-- Subject Picker Modal -->
+    <div id="subject-picker-modal" class="subject-picker-modal">
+        <div class="subject-picker-content">
+            <h3>Select Subject</h3>
+            <div id="subject-list" class="subject-list">
+                <!-- Subject options will be added here -->
+            </div>
+            <button onclick="closeSubjectModal()">Cancel</button>
+        </div>
+    </div>
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
-        // DOM elements
-        const fileInput = document.getElementById('fileInput');
-        const uploadArea = document.getElementById('uploadArea');
-        const previewImage = document.getElementById('previewImage');
-        const previewCanvas = document.getElementById('previewCanvas');
-        const ctx = previewCanvas.getContext('2d');
-        const loadingIndicator = document.getElementById('loadingIndicator');
+        // Initialize variables
+        const subjectColors = [
+            '#FF6B6B', '#48DBFB', '#1DD1A1', '#FD79A8', '#F7B731', 
+            '#A29BFE', '#54A0FF', '#00D2D3', '#576574', '#FF9F43'
+        ];
+        const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        let periodCount = 7; // Now this is modifiable
         
-        // Control elements
-        const downloadBtn = document.getElementById('downloadBtn');
-        const resetBtn = document.getElementById('resetBtn');
-        const filmTypeSelect = document.getElementById('filmType');
-        const filmStrengthSlider = document.getElementById('filmStrength');
-        const filmGrainCheckbox = document.getElementById('filmGrain');
+        let subjects = [];
+        let timetable = {};
+        let bunkPlan = {};
+        let currentCell = null; // To track which cell the modal is for
         
-        // Value displays
-        const filmStrengthValue = document.getElementById('filmStrengthValue');
-        
-        // State variables
-        let originalImage = null;
-        let filmGrainTexture = null;
-        
-        // Initialize
-        filmGrainTexture = createFilmGrainTexture();
-        
-        // Create film grain texture
-        function createFilmGrainTexture() {
-            const canvas = document.createElement('canvas');
-            canvas.width = 1024;
-            canvas.height = 1024;
-            const textureCtx = canvas.getContext('2d');
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTimetableData();
             
-            // Create film grain texture
-            const imageData = textureCtx.createImageData(canvas.width, canvas.height);
-            const data = imageData.data;
+            // Add first subject
+            addSubject();
             
-            for (let i = 0; i < data.length; i += 4) {
-                // More pronounced grain in dark areas
-                const intensity = Math.random() < 0.3 ? Math.random() * 100 : Math.random() * 30;
-                data[i] = intensity;     // R
-                data[i + 1] = intensity; // G
-                data[i + 2] = intensity; // B
-                data[i + 3] = 255;       // A
-            }
+            // Initialize timetable
+            initializeTimetable();
+        });
+
+        // Initialize or reinitialize the timetable data structure
+        function initializeTimetableData() {
+            timetable = {};
+            bunkPlan = {};
             
-            textureCtx.putImageData(imageData, 0, 0);
-            return canvas;
+            days.forEach(day => {
+                timetable[day] = {};
+                bunkPlan[day] = false;
+                
+                for (let period = 1; period <= periodCount; period++) {
+                    timetable[day][period] = null;
+                }
+            });
         }
         
-        // Handle file selection
-        function handleFile(file) {
-            if (!file) return;
+        // Subject management functions
+        function addSubject() {
+            const subjectsContainer = document.getElementById('subjects-container');
+            const subjectId = `subject-${subjects.length + 1}`;
+            const colorIndex = subjects.length % subjectColors.length;
+            const color = subjectColors[colorIndex];
             
-            // Check file size (max 10MB)
-            if (file.size > 10 * 1024 * 1024) {
-                alert('File size exceeds 10MB limit. Please choose a smaller file.');
-                return;
-            }
-            
-            // Check file type
-            if (!['image/jpeg', 'image/png'].includes(file.type)) {
-                alert('Please upload a JPEG or PNG image.');
-                return;
-            }
-            
-            loadingIndicator.classList.add('active');
-            
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                originalImage = new Image();
-                originalImage.onload = () => {
-                    previewImage.src = event.target.result;
-                    previewImage.style.display = 'block';
-                    updateCanvasSize();
-                    applyEffects();
-                    loadingIndicator.classList.remove('active');
-                };
-                originalImage.onerror = () => {
-                    loadingIndicator.classList.remove('active');
-                    alert('Error loading image. Please try another file.');
-                };
-                originalImage.src = event.target.result;
-            };
-            reader.onerror = () => {
-                loadingIndicator.classList.remove('active');
-                alert('Error reading file. Please try again.');
-            };
-            reader.readAsDataURL(file);
-        }
-        
-        // Event listeners
-        uploadArea.addEventListener('click', () => fileInput.click());
-        
-        fileInput.addEventListener('change', (e) => {
-            handleFile(e.target.files[0]);
-            fileInput.value = ''; // Reset to allow selecting same file again
-        });
-        
-        // Drag and drop events
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.classList.add('dragover');
-        });
-        
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.classList.remove('dragover');
-        });
-        
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.classList.remove('dragover');
-            if (e.dataTransfer.files.length) {
-                handleFile(e.dataTransfer.files[0]);
-            }
-        });
-        
-        filmStrengthSlider.addEventListener('input', () => {
-            filmStrengthValue.textContent = filmStrengthSlider.value;
-            applyEffects();
-        });
-        
-        filmTypeSelect.addEventListener('change', applyEffects);
-        filmGrainCheckbox.addEventListener('change', applyEffects);
-        
-        // Reset button
-        resetBtn.addEventListener('click', () => {
-            filmTypeSelect.value = 'none';
-            filmStrengthSlider.value = 100;
-            filmGrainCheckbox.checked = true;
-            filmStrengthValue.textContent = '100';
-            
-            applyEffects();
-        });
-        
-        // Download button
-        downloadBtn.addEventListener('click', () => {
-            if (!originalImage) {
-                alert('Please upload an image first.');
-                return;
-            }
-            
-            const link = document.createElement('a');
-            link.download = 'film-effect-image.png';
-            link.href = previewCanvas.toDataURL('image/png');
-            link.click();
-        });
-        
-        // Update canvas size to match image while maintaining aspect ratio
-        function updateCanvasSize() {
-            if (!originalImage) return;
-            
-            const container = document.querySelector('.preview-container');
-            const containerWidth = container.clientWidth;
-            const containerHeight = container.clientHeight;
-            const imgRatio = originalImage.width / originalImage.height;
-            const containerRatio = containerWidth / containerHeight;
-            
-            if (imgRatio > containerRatio) {
-                // Image is wider than container
-                previewCanvas.width = containerWidth;
-                previewCanvas.height = containerWidth / imgRatio;
-            } else {
-                // Image is taller than container
-                previewCanvas.height = containerHeight;
-                previewCanvas.width = containerHeight * imgRatio;
-            }
-        }
-        
-        // Apply film simulation
-        function applyFilmSimulation(imageData, filmType, strength) {
-            const data = imageData.data;
-            strength = strength / 100; // Convert to 0-1 range
-            
-            // Common film characteristics
-            const applyGrain = filmGrainCheckbox.checked;
-            const grainIntensity = 0.3 * strength;
-            
-            // Apply base film characteristics
-            switch (filmType) {
-                case 'portra160':
-                    // Kodak Portra 160 - warm, soft, fine grain
-                    for (let i = 0; i < data.length; i += 4) {
-                        data[i] = Math.min(255, data[i] * (0.95 + 0.05 * strength));     // Slightly reduce red
-                        data[i + 1] = Math.min(255, data[i + 1] * (0.98 + 0.02 * strength)); // Slightly reduce green
-                        data[i + 2] = Math.min(255, data[i + 2] * (0.92 + 0.08 * strength)); // Boost blue more
-                    }
-                    break;
-                    
-                case 'portra400':
-                    // Kodak Portra 400 - warm, versatile, medium grain
-                    for (let i = 0; i < data.length; i += 4) {
-                        data[i] = Math.min(255, data[i] * (0.97 + 0.03 * strength));     // Slightly reduce red
-                        data[i + 1] = Math.min(255, data[i + 1] * (0.95 + 0.05 * strength)); // Slightly reduce green
-                        data[i + 2] = Math.min(255, data[i + 2] * (0.90 + 0.10 * strength)); // Boost blue more
-                    }
-                    break;
-                    
-                case 'gold200':
-                    // Kodak Gold 200 - vibrant, consumer film
-                    for (let i = 0; i < data.length; i += 4) {
-                        data[i] = Math.min(255, data[i] * (1.05 * strength + (1 - strength)));     // Boost red
-                        data[i + 1] = Math.min(255, data[i + 1] * (1.03 * strength + (1 - strength))); // Slightly boost green
-                        data[i + 2] = Math.min(255, data[i + 2] * (0.95 * strength + (1 - strength))); // Reduce blue slightly
-                    }
-                    break;
-                    
-                case 'ultramax400':
-                    // Kodak Ultramax 400 - high saturation, consumer film
-                    for (let i = 0; i < data.length; i += 4) {
-                        data[i] = Math.min(255, data[i] * (1.08 * strength + (1 - strength)));     // Boost red
-                        data[i + 1] = Math.min(255, data[i + 1] * (1.05 * strength + (1 - strength))); // Boost green
-                        data[i + 2] = Math.min(255, data[i + 2] * (0.97 * strength + (1 - strength))); // Slightly reduce blue
-                    }
-                    break;
-                    
-                case 'superia400':
-                    // Fujifilm Superia X-TRA 400 - cool tones, fine grain
-                    for (let i = 0; i < data.length; i += 4) {
-                        data[i] = Math.min(255, data[i] * (0.95 * strength + (1 - strength)));     // Reduce red
-                        data[i + 1] = Math.min(255, data[i + 1] * (1.00 * strength + (1 - strength))); // Neutral green
-                        data[i + 2] = Math.min(255, data[i + 2] * (1.05 * strength + (1 - strength))); // Boost blue
-                    }
-                    break;
-                    
-                case 'pro400h':
-                    // Fujifilm Pro 400H - cool, pastel tones
-                    for (let i = 0; i < data.length; i += 4) {
-                        data[i] = Math.min(255, data[i] * (0.92 * strength + (1 - strength)));     // Reduce red
-                        data[i + 1] = Math.min(255, data[i + 1] * (0.97 * strength + (1 - strength))); // Slightly reduce green
-                        data[i + 2] = Math.min(255, data[i + 2] * (1.03 * strength + (1 - strength))); // Slightly boost blue
-                    }
-                    break;
-                    
-                case 'provia100f':
-                    // Fujifilm Provia 100F - neutral, accurate colors
-                    // Minimal color shift, just add grain
-                    break;
-                    
-                case 'velvia50':
-                    // Fujifilm Velvia 50 - high saturation, rich colors
-                    for (let i = 0; i < data.length; i += 4) {
-                        data[i] = Math.min(255, data[i] * (1.15 * strength + (1 - strength)));     // Boost red
-                        data[i + 1] = Math.min(255, data[i + 1] * (1.05 * strength + (1 - strength))); // Slightly boost green
-                        data[i + 2] = Math.min(255, data[i + 2] * (0.95 * strength + (1 - strength))); // Slightly reduce blue
-                    }
-                    break;
-                    
-                case 'hp5plus':
-                    // Ilford HP5 Plus - classic B&W, pronounced grain
-                    for (let i = 0; i < data.length; i += 4) {
-                        const avg = (data[i] * 0.3 + data[i + 1] * 0.59 + data[i + 2] * 0.11);
-                        data[i] = avg;
-                        data[i + 1] = avg;
-                        data[i + 2] = avg;
-                    }
-                    break;
-                    
-                case 'trix400':
-                    // Kodak Tri-X 400 - high contrast B&W
-                    for (let i = 0; i < data.length; i += 4) {
-                        let avg = (data[i] * 0.3 + data[i + 1] * 0.59 + data[i + 2] * 0.11);
-                        // Increase contrast
-                        avg = avg < 128 ? avg * 0.8 : avg * 1.2;
-                        data[i] = Math.min(255, avg);
-                        data[i + 1] = Math.min(255, avg);
-                        data[i + 2] = Math.min(255, avg);
-                    }
-                    break;
-                    
-                case 'tmax100':
-                    // Kodak T-Max 100 - fine grain B&W
-                    for (let i = 0; i < data.length; i += 4) {
-                        const avg = (data[i] * 0.3 + data[i + 1] * 0.59 + data[i + 2] * 0.11);
-                        data[i] = avg;
-                        data[i + 1] = avg;
-                        data[i + 2] = avg;
-                    }
-                    break;
-                    
-                case 'ektachrome100':
-                    // Kodak Ektachrome E100 - vibrant slide film
-                    for (let i = 0; i < data.length; i += 4) {
-                        data[i] = Math.min(255, data[i] * (1.10 * strength + (1 - strength)));     // Boost red
-                        data[i + 1] = Math.min(255, data[i + 1] * (1.05 * strength + (1 - strength))); // Slightly boost green
-                        data[i + 2] = Math.min(255, data[i + 2] * (0.98 * strength + (1 - strength))); // Neutral blue
-                    }
-                    break;
-                    
-                case 'vision3_250d':
-                    // Kodak Vision3 250D - cinematic daylight film
-                    for (let i = 0; i < data.length; i += 4) {
-                        data[i] = Math.min(255, data[i] * (1.05 * strength + (1 - strength)));     // Slightly boost red
-                        data[i + 1] = Math.min(255, data[i + 1] * (0.98 * strength + (1 - strength))); // Slightly reduce green
-                        data[i + 2] = Math.min(255, data[i + 2] * (0.95 * strength + (1 - strength))); // Reduce blue
-                    }
-                    break;
-                    
-                case 'cinestill800t':
-                    // Cinestill 800T - tungsten balanced, red halation
-                    for (let i = 0; i < data.length; i += 4) {
-                        data[i] = Math.min(255, data[i] * (1.20 * strength + (1 - strength)));     // Strong boost red
-                        data[i + 1] = Math.min(255, data[i + 1] * (0.90 * strength + (1 - strength))); // Reduce green
-                        data[i + 2] = Math.min(255, data[i + 2] * (0.85 * strength + (1 - strength))); // Reduce blue
-                    }
-                    break;
-                    
-                case 'lomopurple':
-                    // Lomography Purple - psychedelic color shifts
-                    for (let i = 0; i < data.length; i += 4) {
-                        // Shift greens to purple
-                        if (data[i + 1] > data[i] && data[i + 1] > data[i + 2]) {
-                            data[i] = Math.min(255, data[i + 1] * 0.8);
-                            data[i + 2] = Math.min(255, data[i + 1] * 0.9);
-                        }
-                    }
-                    break;
-                    
-                case 'aerochrome':
-                    // Kodak Aerochrome - infrared color film
-                    for (let i = 0; i < data.length; i += 4) {
-                        // Shift greens to red/pink
-                        if (data[i + 1] > data[i] && data[i + 1] > data[i + 2]) {
-                            data[i] = Math.min(255, data[i + 1] * 1.2);
-                            data[i + 1] = Math.min(255, data[i + 1] * 0.4);
-                        }
-                    }
-                    break;
-            }
-            
-            return imageData;
-        }
-        
-        // Main function to apply all effects
-        function applyEffects() {
-            if (!originalImage) return;
-            
-            // Clear canvas
-            ctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
-            
-            // Draw original image (scaled to fit canvas)
-            ctx.drawImage(originalImage, 0, 0, previewCanvas.width, previewCanvas.height);
-            
-            // Get current settings
-            const filmType = filmTypeSelect.value;
-            const filmStrength = filmStrengthSlider.value;
-            const useFilmGrain = filmGrainCheckbox.checked;
-            
-            // Get image data
-            let imageData = ctx.getImageData(0, 0, previewCanvas.width, previewCanvas.height);
-            
-            // Apply film simulation
-            if (filmType !== 'none') {
-                imageData = applyFilmSimulation(imageData, filmType, filmStrength);
-                ctx.putImageData(imageData, 0, 0);
-            }
-            
-            // Apply film grain for film simulations
-            if (useFilmGrain && filmType !== 'none' && filmGrainTexture) {
-                ctx.globalCompositeOperation = 'overlay';
-                ctx.globalAlpha = 0.1 * (filmStrength / 100);
-                ctx.drawImage(filmGrainTexture, 0, 0, previewCanvas.width, previewCanvas.height);
-                ctx.globalAlpha = 1.0;
-                ctx.globalCompositeOperation = 'source-over';
-            }
-        }
-        
-        // Handle window resize
-        window.addEventListener('resize', () => {
-            if (originalImage) {
-                updateCanvasSize();
-                applyEffects();
-            }
-        });
-    </script>
-</body>
-</html>
+            const newSubjectEntry = document.createElement('div');
+            newSubjectEntry.className = 'subject-entry';
+            newSubjectEntry.innerHTML = `
+                <div class="color-indicator" style="background-color: ${color};"></div>
+                <input type="text" placeholder="Subject Name" class="subject-name" value="Subject ${subjects.length + 1}">
+                <label>Min %:</label>
+                <input type="number" placeholder="Min %" class="min-percentage small-input" min="0" max="100" value="75">
+                <label>Total:</label>
+                <input type="number" placeholder="Total" class="total-class
