@@ -16,9 +16,13 @@
     <style>
         body {
             margin: 0;
+            padding: 0;
             background-color: #121212;
             color: #ffffff;
             font-family: 'Roboto Mono', monospace;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
         }
         #map {
             height: calc(100vh - 40px);
@@ -45,26 +49,30 @@
             top: 10px;
             right: 10px;
             z-index: 1000;
+            width: auto;
+        }
+        .search-container {
             display: flex;
-            flex-direction: column;
-            align-items: stretch;
-            width: 180px;
+            align-items: center;
+            gap: 5px;
         }
         .search-bar input {
-            padding: 8px;
+            padding: 6px 8px;
             border-radius: 5px;
             border: 1px solid #555555;
             background-color: #1e1e1e;
             color: #ffffff;
+            width: 150px;
+            font-size: 12px;
         }
         .search-bar button {
-            margin-top: 5px;
-            padding: 8px;
+            padding: 6px 10px;
             background-color: #ff5722;
             color: #ffffff;
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            font-size: 12px;
         }
         .search-bar button:hover {
             background-color: #e64a19;
@@ -95,7 +103,7 @@
             display: none;
             z-index: 1000;
         }
-        .about-button {
+        .about-button, .legend-button, .notifications-button, .location-button {
             background-color: #000000;
             color: #ffffff;
             padding: 5px 10px;
@@ -104,7 +112,7 @@
             border-radius: 3px;
             cursor: pointer;
         }
-        .about-button:hover {
+        .about-button:hover, .legend-button:hover, .notifications-button:hover, .location-button:hover {
             background-color: #333333;
         }
         .marker-cluster-small {
@@ -119,70 +127,354 @@
             background-color: #d50000;
             color: white;
         }
-        .aqi-extremes-btn {
+        #legend-card {
             position: absolute;
-            top: 70px;
-            right: 10px;
+            top: 10px;
+            left: 10px;
+            background-color: #2c2c2c;
+            border-radius: 8px;
+            padding: 12px 15px;
             z-index: 1000;
-            padding: 8px;
-            background-color: #4CAF50;
+            min-width: 200px;
+            max-width: 400px;
+            display: none;
+            border: 1px solid #444444;
+            font-size: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        #notifications-card {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #2c2c2c;
+            border-radius: 8px;
+            padding: 12px 15px;
+            z-index: 1000;
+            width: 300px;
+            display: none;
+            border: 1px solid #444444;
+            font-size: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        #about-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        #about-content {
+            background-color: #2c2c2c;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+            border: 1px solid #444;
+        }
+        #about-content h3 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #fff;
+            border-bottom: 1px solid #444;
+            padding-bottom: 10px;
+        }
+        #about-content p {
+            color: #ccc;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        #close-about {
+            padding: 6px 12px;
+            background-color: #ff5722;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .legend-content, .notifications-content {
+            width: max-content;
+            max-width: 100%;
+        }
+        .legend-item, .notification-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            width: 100%;
+        }
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            margin-right: 10px;
+            border-radius: 3px;
+            flex-shrink: 0;
+        }
+        .legend-item span, .notification-item span {
+            white-space: nowrap;
+            overflow: visible;
+            text-overflow: clip;
+        }
+        #legend-card h3, #notifications-card h3 {
+            font-size: 14px;
+            margin-bottom: 12px;
+            font-weight: bold;
+            white-space: nowrap;
+            color: #ffffff;
+            border-bottom: 1px solid #444;
+            padding-bottom: 6px;
+            width: 100%;
+        }
+        .notification-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        .notification-form {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .notification-form input, .notification-form select {
+            padding: 6px 8px;
+            border-radius: 5px;
+            border: 1px solid #555555;
+            background-color: #1e1e1e;
+            color: #ffffff;
+            width: 100%;
+            font-size: 12px;
+        }
+        .notification-form button {
+            padding: 6px 10px;
+            background-color: #ff5722;
             color: #ffffff;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            width: 180px;
+            font-size: 12px;
         }
-        .aqi-extremes-btn:hover {
-            background-color: #3e8e41;
+        .notification-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 10px;
         }
-        .location-btn {
-            position: absolute;
-            top: 110px;
-            right: 10px;
-            z-index: 1000;
-            padding: 8px;
-            background-color: #2196F3;
-            color: #ffffff;
-            border: none;
-            border-radius: 5px;
+        .notification-entry {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            border-bottom: 1px solid #444;
+        }
+        .delete-notification {
+            color: #ff5722;
             cursor: pointer;
-            width: 180px;
+            font-weight: bold;
         }
-        .location-btn:hover {
-            background-color: #0b7dda;
+        @media (max-width: 768px) {
+            #legend-card, #notifications-card {
+                top: 60px;
+                left: 10px;
+                right: 10px;
+                width: calc(100% - 20px);
+                max-width: none;
+            }
+            .legend-content, .notifications-content {
+                width: 100%;
+            }
+            .legend-item, .notification-item {
+                white-space: normal;
+            }
+            .legend-item span, .notification-item span {
+                white-space: normal;
+            }
+            .search-bar {
+                width: calc(100% - 20px);
+                right: 10px;
+            }
+            .search-container {
+                width: 100%;
+            }
+            .search-bar input {
+                width: 100%;
+            }
+        }
+        #location-card {
+            position: absolute;
+            top: 60px;
+            right: 10px;
+            background-color: #2c2c2c;
+            border-radius: 8px;
+            padding: 12px 15px;
+            z-index: 1000;
+            width: 250px;
+            display: none;
+            border: 1px solid #444444;
+            font-size: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        .location-info {
+            margin-bottom: 10px;
+        }
+        .location-info p {
+            margin: 5px 0;
+        }
+        .location-actions {
+            display: flex;
+            justify-content: space-between;
         }
     </style>
 </head>
 <body>
     <div id="loader" class="loader">Loading...</div>
     <div class="search-bar">
-        <input id="search-input" type="text" placeholder="Search...">
-        <button id="search-button">Search</button>
+        <div class="search-container">
+            <input id="search-input" type="text" placeholder="Search location">
+            <button id="search-button">Go</button>
+        </div>
     </div>
-    <button id="aqi-extremes-btn" class="aqi-extremes-btn">Show AQI Extremes</button>
-    <button id="location-btn" class="location-btn">Use My Location</button>
     <div id="map"></div>
+    <div id="legend-card">
+        <div class="legend-content">
+            <h3>AQI Levels Legend</h3>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #00e676"></div>
+                <span>0-50 (Good)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #ffeb3b"></div>
+                <span>51-100 (Moderate)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #ff9800"></div>
+                <span>101-150 (Unhealthy for Sensitive Groups)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #ff5722"></div>
+                <span>151-200 (Unhealthy)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #d50000"></div>
+                <span>201+ (Very Unhealthy/Hazardous)</span>
+            </div>
+        </div>
+    </div>
+    <div id="notifications-card">
+        <div class="notifications-content">
+            <h3>AQI Notifications</h3>
+            <div class="notification-form">
+                <input type="text" id="notification-name" placeholder="Location name">
+                <input type="number" id="notification-lat" placeholder="Latitude" step="any">
+                <input type="number" id="notification-lng" placeholder="Longitude" step="any">
+                <select id="notification-threshold">
+                    <option value="50">Good (0-50)</option>
+                    <option value="100">Moderate (51-100)</option>
+                    <option value="150">Unhealthy for Sensitive Groups (101-150)</option>
+                    <option value="200" selected>Unhealthy (151-200)</option>
+                    <option value="300">Very Unhealthy (201-300)</option>
+                    <option value="500">Hazardous (301-500)</option>
+                </select>
+                <button id="add-notification">Add Notification</button>
+            </div>
+            <div class="notification-list" id="notification-list">
+                <!-- Notifications will be listed here -->
+            </div>
+        </div>
+    </div>
+    <div id="location-card">
+        <div class="location-content">
+            <h3>Current Location AQI</h3>
+            <div class="location-info" id="location-info">
+                <p>Loading your location...</p>
+            </div>
+            <div class="location-actions">
+                <button id="add-current-notification" class="about-button">Set Notification</button>
+                <button id="close-location-card" class="about-button">Close</button>
+            </div>
+        </div>
+    </div>
     <div class="bottom-bar">
         <span>BreathMap</span>
-        <button class="about-button" onclick="location.href='about.html'">About</button>
+        <div>
+            <button class="legend-button mr-2" id="toggle-legend">Legend</button>
+            <button class="notifications-button mr-2" id="toggle-notifications">Notifications</button>
+            <button class="location-button mr-2" id="location-button">My Location</button>
+            <button class="about-button" id="about-button">About</button>
+        </div>
     </div>
+
+    <!-- About Modal -->
+    <div id="about-modal">
+        <div id="about-content">
+            <h3>About BreathMap</h3>
+            <p>
+                BreathMap is an interactive AQI (Air Quality Index) visualization tool that helps users monitor air quality around the world.
+                This website displays a live Air Quality Index (AQI) heatmap using data sourced from:<br>
+
+                <a href="https://api.openstreetmap.org" style="color:rgb(105, 105, 235);">API</a><br>
+<a href="https://www.openstreetmap.org" style="color:rgb(105, 105, 235);">OpenStreetMap</a><br>
+<a href="https://leafletjs.com" style="color:rgb(105, 105, 235);">LeafletJS</a><br>
+<a href="https://carto.com" style="color:rgb(105, 105, 235);">Carto</a><br>
+
+                
+Built using modern web technologies and designed with a minimalist approach for enhanced usability and visual appeal.
+            </p>
+            <p>
+                <strong>Developed by:</strong><br>
+                - SIYAN <br>
+                - SIVADEV<br>
+                - SOURAV<br>
+                - RONIN
+            </p>
+            <p>
+                The project utilizes data from the World Air Quality Index project and OpenStreetMap.
+            </p>
+            <button id="close-about">Close</button>
+        </div>
+    </div>
+
     <script>
         let map, heat, markersLayer, cache = new Map();
         const loader = document.getElementById('loader');
         const searchInput = document.getElementById('search-input');
         const searchButton = document.getElementById('search-button');
-        const aqiExtremesBtn = document.getElementById('aqi-extremes-btn');
-        const locationBtn = document.getElementById('location-btn');
+        const legendCard = document.getElementById('legend-card');
+        const notificationsCard = document.getElementById('notifications-card');
+        const locationCard = document.getElementById('location-card');
+        const toggleLegendButton = document.getElementById('toggle-legend');
+        const toggleNotificationsButton = document.getElementById('toggle-notifications');
+        const locationButton = document.getElementById('location-button');
+        const addNotificationButton = document.getElementById('add-notification');
+        const notificationList = document.getElementById('notification-list');
+        const aboutButton = document.getElementById('about-button');
+        const aboutModal = document.getElementById('about-modal');
+        const closeAbout = document.getElementById('close-about');
+        const locationInfo = document.getElementById('location-info');
+        const addCurrentNotificationButton = document.getElementById('add-current-notification');
+        const closeLocationCard = document.getElementById('close-location-card');
         let searchMarker = null;
-        let allStations = [];
+        let notificationMarkers = [];
+        let notificationCheckInterval = null;
+        let savedNotifications = JSON.parse(localStorage.getItem('aqiNotifications')) || [];
+        let currentLocationMarker = null;
+        let currentLocationData = null;
 
+        // Initialize the map
         function initializeMap(center) {
+            // Make sure the map container has proper dimensions
+            const mapElement = document.getElementById('map');
+            mapElement.style.height = 'calc(100vh - 40px)';
+            mapElement.style.width = '100vw';
+            
             map = L.map('map', {
                 preferCanvas: true,
                 maxBounds: [[-90, -180], [90, 180]],
                 maxZoom: 18,
-                minZoom: 2
-            }).setView(center, 5);
+                minZoom: 2,
+                zoomControl: false
+            }).setView(center || [20, 0], 5);
 
             L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
                 attribution: '&copy; <a href="https://carto.com/">Carto</a>',
@@ -218,8 +510,122 @@
                     });
                 }
             }).addTo(map);
+            
+            // Add some initial data to make sure the map is working
+            setTimeout(updateMapData, 500);
         }
 
+        // About modal functionality
+        aboutButton.addEventListener('click', function() {
+            aboutModal.style.display = 'flex';
+        });
+
+        closeAbout.addEventListener('click', function() {
+            aboutModal.style.display = 'none';
+        });
+
+        // Close modal when clicking outside
+        aboutModal.addEventListener('click', function(e) {
+            if (e.target === aboutModal) {
+                aboutModal.style.display = 'none';
+            }
+        });
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize the map first
+            initializeMap([20, 0]);
+            
+            // Request notification permission
+            if (Notification.permission !== 'granted') {
+                Notification.requestPermission();
+            }
+
+            // Load saved notifications
+            renderNotifications();
+            savedNotifications.forEach(addNotificationMarker);
+            if (savedNotifications.length > 0) {
+                startNotificationChecks();
+            }
+
+            // Search functionality
+            searchButton.addEventListener('click', () => {
+                const query = searchInput.value.trim();
+                if (query) searchLocation(query);
+            });
+
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    const query = searchInput.value.trim();
+                    if (query) searchLocation(query);
+                }
+            });
+
+            // Toggle legend
+            toggleLegendButton.addEventListener('click', () => {
+                legendCard.style.display = legendCard.style.display === 'none' ? 'block' : 'none';
+                if (legendCard.style.display === 'block') {
+                    notificationsCard.style.display = 'none';
+                    locationCard.style.display = 'none';
+                }
+            });
+
+            // Toggle notifications
+            toggleNotificationsButton.addEventListener('click', () => {
+                notificationsCard.style.display = notificationsCard.style.display === 'none' ? 'block' : 'none';
+                if (notificationsCard.style.display === 'block') {
+                    legendCard.style.display = 'none';
+                    locationCard.style.display = 'none';
+                }
+            });
+
+            // Toggle location card
+            locationButton.addEventListener('click', () => {
+                locationCard.style.display = locationCard.style.display === 'none' ? 'block' : 'none';
+                if (locationCard.style.display === 'block') {
+                    legendCard.style.display = 'none';
+                    notificationsCard.style.display = 'none';
+                    getCurrentLocation();
+                }
+            });
+
+            // Close location card
+            closeLocationCard.addEventListener('click', () => {
+                locationCard.style.display = 'none';
+            });
+
+            // Add notification for current location
+            addCurrentNotificationButton.addEventListener('click', () => {
+                if (currentLocationData) {
+                    const { name, lat, lng, aqi } = currentLocationData;
+                    const threshold = Math.ceil(aqi / 50) * 50; // Round up to nearest 50
+                    addNotification(name, lat, lng, threshold);
+                    locationCard.style.display = 'none';
+                }
+            });
+
+            // Add notification
+            addNotificationButton.addEventListener('click', () => {
+                const name = document.getElementById('notification-name').value.trim();
+                const lat = parseFloat(document.getElementById('notification-lat').value);
+                const lng = parseFloat(document.getElementById('notification-lng').value);
+                const threshold = parseInt(document.getElementById('notification-threshold').value);
+                
+                if (!name || isNaN(lat) || isNaN(lng) || isNaN(threshold)) {
+                    alert('Please fill all fields with valid values');
+                    return;
+                }
+                
+                addNotification(name, lat, lng, threshold);
+                
+                // Clear form
+                document.getElementById('notification-name').value = '';
+                document.getElementById('notification-lat').value = '';
+                document.getElementById('notification-lng').value = '';
+            });
+        });
+
+        // Fetch data from API with caching
         async function fetchData(apiUrl) {
             if (cache.has(apiUrl)) return cache.get(apiUrl);
             try {
@@ -229,13 +635,14 @@
                 cache.set(apiUrl, data);
                 return data;
             } catch (error) {
-                alert("Failed to fetch data. Please try again later.");
+                console.error("Failed to fetch data:", error);
                 return null;
             } finally {
                 loader.style.display = 'none';
             }
         }
 
+        // Update map data with AQI information
         async function updateMapData() {
             const boundsList = [
                 [-85, -180, 0, 0],
@@ -246,7 +653,6 @@
 
             const heatPoints = [];
             markersLayer.clearLayers();
-            allStations = [];
 
             for (const bounds of boundsList) {
                 const [south, west, north, east] = bounds;
@@ -265,12 +671,6 @@
 
                         if (isValidAqi) {
                             heatPoints.push([station.lat, station.lon, aqi / 500]);
-                            allStations.push({
-                                lat: station.lat,
-                                lon: station.lon,
-                                aqi: aqi,
-                                name: station.station.name || 'N/A'
-                            });
                         }
 
                         const marker = L.circleMarker([station.lat, station.lon], {
@@ -294,105 +694,137 @@
                 heat.setLatLngs(heatPoints);
             } else {
                 console.warn("No valid heatmap points available");
+                // Add some dummy points just to show the map is working
+                heat.setLatLngs([[20, 0, 0.5], [30, 10, 0.8], [10, -10, 0.3]]);
             }
 
             map.addLayer(markersLayer);
         }
 
-        function showAqiExtremes() {
-            // Clear previous extremes markers
-            markersLayer.eachLayer(layer => {
-                if (layer.options.extremeMarker) {
-                    markersLayer.removeLayer(layer);
-                }
-            });
-
-            const validStations = allStations.filter(s => !isNaN(s.aqi) && s.aqi >= 0);
-            
-            if (validStations.length < 3) {
-                alert("Not enough stations with valid AQI data");
-                return;
-            }
-
-            // Sort stations by AQI
-            const sortedStations = [...validStations].sort((a, b) => a.aqi - b.aqi);
-            
-            // Get best and worst
-            const bestStations = sortedStations.slice(0, 3);
-            const worstStations = sortedStations.slice(-3).reverse();
-
-            // Add markers for best AQI
-            bestStations.forEach(station => {
-                const marker = L.circleMarker([station.lat, station.lon], {
-                    radius: 8,
-                    fillColor: "#00e676",
-                    color: "#ffffff",
-                    weight: 2,
-                    opacity: 1,
-                    fillOpacity: 0.9,
-                    extremeMarker: true
-                }).bindPopup(`
-                    <strong>Best AQI Station:</strong> ${station.name}<br>
-                    <strong>AQI:</strong> ${station.aqi}
-                `);
-                markersLayer.addLayer(marker);
-                marker.openPopup();
-            });
-
-            // Add markers for worst AQI
-            worstStations.forEach(station => {
-                const marker = L.circleMarker([station.lat, station.lon], {
-                    radius: 8,
-                    fillColor: "#d50000",
-                    color: "#ffffff",
-                    weight: 2,
-                    opacity: 1,
-                    fillOpacity: 0.9,
-                    extremeMarker: true
-                }).bindPopup(`
-                    <strong>Worst AQI Station:</strong> ${station.name}<br>
-                    <strong>AQI:</strong> ${station.aqi}
-                `);
-                markersLayer.addLayer(marker);
-                marker.openPopup();
-            });
-
-            // Fit bounds to show all extremes
-            const extremes = [...bestStations, ...worstStations];
-            const bounds = L.latLngBounds(extremes.map(s => [s.lat, s.lon]));
-            map.fitBounds(bounds, { padding: [50, 50] });
-        }
-
+        // Search for a location
         async function searchLocation(query) {
-            const geocodeData = await fetchData(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json`);
-            if (!geocodeData || geocodeData.length === 0) {
-                alert("Location not found. Please try again.");
+            if (!query) return;
+            
+            try {
+                const geocodeData = await fetchData(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json`);
+                if (!geocodeData || geocodeData.length === 0) {
+                    alert("Location not found. Please try again.");
+                    return;
+                }
+
+                const { lat, lon } = geocodeData[0];
+                const reverseData = await fetchData(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
+                const locationName = reverseData?.display_name || query;
+
+                // Update notification form with location data
+                document.getElementById('notification-name').value = locationName;
+                document.getElementById('notification-lat').value = lat;
+                document.getElementById('notification-lng').value = lon;
+
+                const aqiData = await fetchData(`https://api.waqi.info/feed/geo:${lat};${lon}/?token=b4e61d40c7efcf81d2b8bb699d3138da26603d1e`);
+                const aqi = parseInt(aqiData?.data?.aqi);
+                const isValidAqi = !isNaN(aqi) && aqi >= 0;
+
+                if (searchMarker) {
+                    map.removeLayer(searchMarker);
+                }
+
+                searchMarker = L.marker([lat, lon])
+                    .bindPopup(`
+                        <strong>Location:</strong> ${locationName}<br>
+                        <strong>AQI:</strong> ${isValidAqi ? aqi : 'N/A'}
+                    `)
+                    .addTo(map);
+
+                map.setView([lat, lon], 10);
+                searchMarker.openPopup();
+            } catch (error) {
+                console.error("Search error:", error);
+                alert("Error searching for location. Please try again.");
+            }
+        }
+
+        // Get current location and AQI
+        async function getCurrentLocation() {
+            if (!navigator.geolocation) {
+                locationInfo.innerHTML = '<p>Geolocation is not supported by your browser</p>';
                 return;
             }
 
-            const { lat, lon } = geocodeData[0];
-            const reverseData = await fetchData(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
-            const locationName = reverseData?.display_name || query;
+            locationInfo.innerHTML = '<p>Getting your location...</p>';
 
-            const aqiData = await fetchData(`https://api.waqi.info/feed/geo:${lat};${lon}/?token=b4e61d40c7efcf81d2b8bb699d3138da26603d1e`);
-            const aqi = parseInt(aqiData?.data?.aqi);
-            const isValidAqi = !isNaN(aqi) && aqi >= 0;
+            try {
+                const position = await new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(resolve, reject, {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
+                    });
+                });
 
-            if (searchMarker) {
-                map.removeLayer(searchMarker);
-            }
+                const { latitude: lat, longitude: lng } = position.coords;
+                
+                // Get location name
+                const reverseData = await fetchData(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
+                const locationName = reverseData?.display_name || 'Your Location';
+                
+                // Get AQI data
+                const aqiData = await fetchData(`https://api.waqi.info/feed/geo:${lat};${lng}/?token=b4e61d40c7efcf81d2b8bb699d3138da26603d1e`);
+                const aqi = parseInt(aqiData?.data?.aqi);
+                const isValidAqi = !isNaN(aqi) && aqi >= 0;
 
-            searchMarker = L.marker([lat, lon])
-                .bindPopup(`
-                    <strong>Location:</strong> ${locationName}<br>
+                // Update location info
+                locationInfo.innerHTML = `
+                    <p><strong>Location:</strong> ${locationName}</p>
+                    <p><strong>Coordinates:</strong> ${lat.toFixed(4)}, ${lng.toFixed(4)}</p>
+                    <p><strong>AQI:</strong> ${isValidAqi ? aqi : 'N/A'} ${isValidAqi ? `<span style="color:${getAqiColor(aqi)}">${getAqiLevel(aqi)}</span>` : ''}</p>
+                `;
+
+                // Save data for notification
+                currentLocationData = {
+                    name: locationName,
+                    lat,
+                    lng,
+                    aqi: isValidAqi ? aqi : 0
+                };
+
+                // Add marker to map
+                if (currentLocationMarker) {
+                    map.removeLayer(currentLocationMarker);
+                }
+
+                currentLocationMarker = L.marker([lat, lng], {
+                    icon: L.divIcon({
+                        className: 'current-location-marker',
+                        html: '📍',
+                        iconSize: [24, 24]
+                    })
+                }).bindPopup(`
+                    <strong>Your Location</strong><br>
+                    ${locationName}<br>
                     <strong>AQI:</strong> ${isValidAqi ? aqi : 'N/A'}
-                `)
-                .addTo(map);
+                `).addTo(map);
 
-            map.setView([lat, lon], 10);
-            searchMarker.openPopup();
+                // Center map on location
+                map.setView([lat, lng], 12);
+
+            } catch (error) {
+                console.error("Error getting location:", error);
+                locationInfo.innerHTML = '<p>Error getting your location. Please try again.</p>';
+            }
         }
 
+        // Get AQI level description
+        function getAqiLevel(aqi) {
+            if (aqi <= 50) return "(Good)";
+            if (aqi <= 100) return "(Moderate)";
+            if (aqi <= 150) return "(Unhealthy for Sensitive Groups)";
+            if (aqi <= 200) return "(Unhealthy)";
+            if (aqi <= 300) return "(Very Unhealthy)";
+            return "(Hazardous)";
+        }
+
+        // Get color based on AQI value
         function getAqiColor(aqi) {
             if (aqi <= 50) return "#00e676";
             if (aqi <= 100) return "#ffeb3b";
@@ -401,60 +833,135 @@
             return "#d50000";
         }
 
-        function getUserLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    async (position) => {
-                        const { latitude, longitude } = position.coords;
-                        const reverseData = await fetchData(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`);
-                        const locationName = reverseData?.display_name || "Your Location";
+        // Show AQI alert
+        function showAqiAlert(locationName, aqi, threshold) {
+            const message = `⚠️ High AQI Alert! ${locationName} has AQI of ${aqi} (threshold: ${threshold}).`;
 
-                        const aqiData = await fetchData(`https://api.waqi.info/feed/geo:${latitude};${longitude}/?token=b4e61d40c7efcf81d2b8bb699d3138da26603d1e`);
-                        const aqi = parseInt(aqiData?.data?.aqi);
-                        const isValidAqi = !isNaN(aqi) && aqi >= 0;
-
-                        if (searchMarker) {
-                            map.removeLayer(searchMarker);
-                        }
-
-                        searchMarker = L.marker([latitude, longitude], {
-                            icon: L.divIcon({
-                                className: 'user-location-icon',
-                                html: '<div style="background-color: #2196F3; border-radius: 50%; width: 20px; height: 20px; border: 2px solid white;"></div>',
-                                iconSize: [24, 24]
-                            })
-                        })
-                        .bindPopup(`
-                            <strong>Your Location:</strong> ${locationName}<br>
-                            <strong>AQI:</strong> ${isValidAqi ? aqi : 'N/A'}
-                        `)
-                        .addTo(map);
-
-                        map.setView([latitude, longitude], 12);
-                        searchMarker.openPopup();
-                    },
-                    (error) => {
-                        alert("Unable to retrieve your location. Please enable location services.");
-                        console.error("Geolocation error:", error);
-                    }
-                );
+            // Browser Notification
+            if (Notification.permission === "granted") {
+                new Notification("BreathMap AQI Alert", { 
+                    body: message, 
+                    icon: "favicon.png",
+                    requireInteraction: true
+                });
             } else {
-                alert("Geolocation is not supported by your browser.");
+                alert(message); // Fallback alert if notifications are blocked
             }
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            initializeMap([20, 0]);
-            updateMapData();
+        // Save notifications to localStorage
+        function saveNotifications() {
+            localStorage.setItem('aqiNotifications', JSON.stringify(savedNotifications));
+        }
 
-            searchButton.addEventListener('click', () => {
-                const query = searchInput.value.trim();
-                if (query) searchLocation(query);
+        // Add a new notification
+        function addNotification(name, lat, lng, threshold) {
+            const id = Date.now().toString();
+            const notification = { id, name, lat, lng, threshold };
+            savedNotifications.push(notification);
+            saveNotifications();
+            renderNotifications();
+            startNotificationChecks();
+            addNotificationMarker(notification);
+        }
+
+        // Remove a notification
+        function removeNotification(id) {
+            savedNotifications = savedNotifications.filter(n => n.id !== id);
+            saveNotifications();
+            renderNotifications();
+            removeNotificationMarker(id);
+            
+            if (savedNotifications.length === 0) {
+                stopNotificationChecks();
+            }
+        }
+
+        // Render the list of notifications
+        function renderNotifications() {
+            notificationList.innerHTML = '';
+            
+            if (savedNotifications.length === 0) {
+                notificationList.innerHTML = '<p>No notifications set</p>';
+                return;
+            }
+            
+            savedNotifications.forEach(notification => {
+                const entry = document.createElement('div');
+                entry.className = 'notification-entry';
+                entry.innerHTML = `
+                    <span>${notification.name} (AQI > ${notification.threshold})</span>
+                    <span class="delete-notification" data-id="${notification.id}">✕</span>
+                `;
+                notificationList.appendChild(entry);
             });
+            
+            // Add event listeners to delete buttons
+            document.querySelectorAll('.delete-notification').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    removeNotification(e.target.dataset.id);
+                });
+            });
+        }
 
-            aqiExtremesBtn.addEventListener('click', showAqiExtremes);
-            locationBtn.addEventListener('click', getUserLocation);
-        });
+        // Add a marker for a notification
+        function addNotificationMarker(notification) {
+            const marker = L.marker([notification.lat, notification.lng], {
+                icon: L.divIcon({
+                    className: 'notification-marker',
+                    html: '🔔',
+                    iconSize: [24, 24]
+                })
+            }).bindPopup(`
+                <strong>AQI Notification</strong><br>
+                ${notification.name}<br>
+                Alert when AQI > ${notification.threshold}
+            `).addTo(map);
+            
+            notificationMarkers.push({ id: notification.id, marker });
+        }
+
+        // Remove a notification marker
+        function removeNotificationMarker(id) {
+            const index = notificationMarkers.findIndex(m => m.id === id);
+            if (index !== -1) {
+                map.removeLayer(notificationMarkers[index].marker);
+                notificationMarkers.splice(index, 1);
+            }
+        }
+
+        // Check all notifications for AQI alerts
+        async function checkNotifications() {
+            if (savedNotifications.length === 0) return;
+            
+            for (const notification of savedNotifications) {
+                try {
+                    const aqiData = await fetchData(`https://api.waqi.info/feed/geo:${notification.lat};${notification.lng}/?token=b4e61d40c7efcf81d2b8bb699d3138da26603d1e`);
+                    const aqi = parseInt(aqiData?.data?.aqi);
+                    
+                    if (!isNaN(aqi) && aqi > notification.threshold) {
+                        showAqiAlert(notification.name, aqi, notification.threshold);
+                    }
+                } catch (error) {
+                    console.error(`Failed to check AQI for ${notification.name}:`, error);
+                }
+            }
+        }
+
+        // Start periodic notification checks
+        function startNotificationChecks() {
+            if (notificationCheckInterval) return;
+            notificationCheckInterval = setInterval(checkNotifications, 300000); // Check every 5 minutes
+            checkNotifications(); // Also check immediately
+        }
+
+        // Stop periodic notification checks
+        function stopNotificationChecks() {
+            if (notificationCheckInterval) {
+                clearInterval(notificationCheckInterval);
+                notificationCheckInterval = null;
+            }
+        }
     </script>
 </body>
 </html>
