@@ -1,129 +1,593 @@
 <!DOCTYPE html><html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>School Bus Maintenance Dashboard</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>School Bus Maintenance Manager</title>
 <style>
-    body { font-family: 'Segoe UI', sans-serif; background: #eef2f5; margin: 0; padding: 0; }
-    header { background: linear-gradient(90deg, #1d3557, #457b9d); color: white; padding: 20px; text-align: center; box-shadow: 0 3px 6px rgba(0,0,0,0.1); }
-    .container { width: 90%; max-width: 1000px; margin: auto; margin-top: 20px; }
-    .card { background: white; padding: 15px; margin-bottom: 15px; border-radius: 10px; box-shadow: 0 3px 8px rgba(0,0,0,0.08); cursor: pointer; transition: transform 0.2s; overflow: hidden; }
-    .card:hover { transform: scale(1.01); }
-    .due-soon { border-left: 6px solid #f6c23e; }
-    .overdue { border-left: 6px solid #e74a3b; }
-    h2 { margin-top: 0; color: #1d3557; }
-    label { display: block; margin-top: 10px; color: #333; font-weight: bold; }
-    input, select { padding: 8px; width: calc(100% - 16px); margin-top: 5px; border-radius: 6px; border: 1px solid #ccc; font-size: 14px; box-sizing: border-box; }
-    button { margin-top: 10px; padding: 10px; background: #1d3557; color: white; border: none; border-radius: 6px; cursor: pointer; transition: background 0.2s; }
-    button:hover { background: #16324f; }
-    .task-list { display: none; margin-top: 12px; padding-left: 10px; border-top: 1px solid #ddd; padding-top: 10px; }
-    .task-list div { padding: 5px 0; border-bottom: 1px solid #f1f1f1; }
-    .task-list div:last-child { border-bottom: none; }
-    .task-button { background: #27ae60; border-radius: 5px; padding: 4px 8px; margin-left: 8px; font-size: 12px; }
-    .task-button:hover { background: #1e8c4a; }
-    .vehicle-header { display: flex; align-items: center; gap: 15px; }
-    .vehicle-image { width: 60px; height: 60px; background: #ddd; border-radius: 8px; object-fit: cover; }
-    .vehicle-info { flex: 1; }
-</style>
+  :root {
+    --bg: #0f172a;
+    --card: #1e293b;
+    --ink: #e2e8f0;
+    --muted: #94a3b8;
+    --brand: #3b82f6;
+    --brand2: #8b5cf6;
+    --ok: #22c55e;
+    --warn: #f59e0b;
+    --bad: #ef4444;
+    --line: #334155;
+  }
+  :root.light {
+    --bg: #eef2f5;
+    --card: #ffffff;
+    --ink: #0f172a;
+    --muted: #64748b;
+    --brand: #2563eb;
+    --brand2: #7c3aed;
+    --ok: #16a34a;
+    --warn: #d97706;
+    --bad: #dc2626;
+    --line: #e5e7eb;
+  }
+  *{box-sizing:border-box}
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  header {
+    background: linear-gradient(90deg, var(--brand), var(--brand2));
+    color: #fff;
+    padding: 14px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    box-shadow: 0 8px 20px rgba(0,0,0,.2);
+  }
+  header .top { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  header h1 { margin:0; font-size:18px; }
+  header .tabs { display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
+  .tab { padding:8px 12px; border-radius:999px; background: rgba(255,255,255,.14); color:#fff; cursor:pointer; border:1px solid rgba(255,255,255,.2); font-size:13px; }
+  .tab.active { background:#fff; color:#0f172a; }.wrap{width:95%;max-width:1100px;margin:16px auto 90px}
+
+/* Controls */ .controls{display:grid;grid-template-columns:1fr 160px 180px 160px;gap:10px;margin:10px 0 20px} .controls input,.controls select,.controls button{width:100%;padding:10px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:14px}
+
+/* Cards */ .card{background:var(--card);border-radius:16px;box-shadow:0 6px 22px rgba(0,0,0,.18);margin-bottom:14px;overflow:hidden;border:1px solid var(--line)} .card.clickable{cursor:pointer} .row{display:flex;gap:14px;align-items:center;padding:14px} .vehicle-img{width:64px;height:64px;border-radius:12px;background:#0b1220;object-fit:cover;flex:0 0 auto} :root.light .vehicle-img{background:#e5e7eb} .grow{flex:1} .title{font-weight:800;color:var(--ink);font-size:16px} .sub{color:var(--muted);font-size:13px} .status{font-size:12px;padding:4px 8px;border-radius:999px;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line)} .status.ok{background:rgba(34,197,94,.15)} .status.warn{background:rgba(245,158,11,.15)} .status.bad{background:rgba(239,68,68,.15)} .bold{font-weight:700} .days{font-variant-numeric:tabular-nums} .progress{height:8px;background:#0b1220;border-radius:999px;overflow:hidden;border:1px solid var(--line)} :root.light .progress{background:#e5e7eb} .bar{height:100%} .bar.ok{background:var(--ok)} .bar.warn{background:var(--warn)} .bar.bad{background:var(--bad)}
+
+/* Expand */ .expand{display:none;border-top:1px solid var(--line);padding:10px 14px 14px} .task-row{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px dashed var(--line)} .task-row:last-child{border-bottom:0} .btn{border:0;border-radius:12px;padding:10px 12px;font-size:13px;cursor:pointer;background:var(--brand);color:#fff} .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink)} .btn.green{background:var(--ok)} .btn.red{background:var(--bad)}
+
+/* Vehicle grid */ .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px} .vehicle-card .meta{display:flex;align-items:center;justify-content:space-between}
+
+/* History */ table{width:100%;border-collapse:separate;border-spacing:0 8px} th,td{padding:10px 12px;text-align:left} tbody tr{background:var(--card);border:1px solid var(--line)} tbody tr td:first-child{border-top-left-radius:12px;border-bottom-left-radius:12px} tbody tr td:last-child{border-top-right-radius:12px;border-bottom-right-radius:12px}
+
+/* Bottom nav + FAB */ .bottom{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:10px 6px;z-index:30} .navbtn{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;color:var(--muted);cursor:pointer} .navbtn.active{color:var(--ink)} .fab{position:fixed;right:20px;bottom:72px;width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,var(--brand),var(--brand2));color:#fff;font-size:26px;cursor:pointer;box-shadow:0 10px 26px rgba(0,0,0,.35);z-index:35}
+
+/* Modal */ .overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:40} .modal{width:min(760px,92vw);background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:0 24px 60px rgba(0,0,0,.5);overflow:hidden} .modal .head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--line)} .modal .body{padding:16px} .form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px} label{font-size:12px;color:var(--muted);font-weight:700} input,select{width:100%;padding:10px;border-radius:12px;border:1px solid var(--line);background:transparent;color:var(--ink)} .task-matrix{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px} .chip{display:flex;align-items:center;gap:8px;padding:10px;border:1px solid var(--line);border-radius:12px}
+
+/* Responsive */ @media (max-width:880px){ .controls{grid-template-columns:1fr 1fr} .grid{grid-template-columns:1fr} .form-grid{grid-template-columns:1fr} } </style>
+
 </head>
 <body>
-<header>
-    <h1>School Bus Maintenance Dashboard</h1>
-</header>
-<div class="container">
-    <h2>Add Vehicle Task</h2>
-    <div class="card">
-        <label>Vehicle Name:</label>
-        <input type="text" id="vehicleName">
-        <label>Vehicle Number:</label>
-        <input type="text" id="vehicleNumber">
-        <label>Vehicle Image:</label>
-        <input type="file" id="vehicleImage" accept="image/*">
-        <label>Task Type:</label>
-        <select id="taskType">
-            <option>Insurance</option>
-            <option>Fitness Test</option>
-            <option>Extinguisher Refill</option>
-            <option>Pollution Test</option>
-            <option>First Aid Kit Replacement</option>
-            <option>Taxes</option>
-        </select>
-        <label>Last Renewal Date:</label>
-        <input type="date" id="lastDate">
-        <label>Renewal Interval (months):</label>
-        <input type="number" id="interval" min="1" value="12">
-        <button onclick="addTask()">Add Task</button>
+  <header>
+    <div class="top">
+      <h1>School Bus Maintenance Manager</h1>
+      <div style="display:flex;gap:8px">
+        <button class="btn ghost" id="themeBtn">Toggle Theme</button>
+        <button class="btn ghost" id="notifyBtn">Enable Notifications</button>
+      </div>
     </div>
-    <h2>Upcoming Tasks</h2>
-    <div id="dashboard"></div>
-</div>
-<script>
-let tasks = JSON.parse(localStorage.getItem('tasks')) || [];function addTask() { let vehicle = document.getElementById('vehicleName').value.trim(); let vehicleNumber = document.getElementById('vehicleNumber').value.trim(); let imageFile = document.getElementById('vehicleImage').files[0]; let imageUrl = imageFile ? URL.createObjectURL(imageFile) : ''; let taskType = document.getElementById('taskType').value; let lastDate = new Date(document.getElementById('lastDate').value); let interval = parseInt(document.getElementById('interval').value);
-
-if (!vehicle || !vehicleNumber || isNaN(lastDate.getTime())) {
-    alert('Please fill all fields correctly');
-    return;
-}
-let nextDate = new Date(lastDate);
-nextDate.setMonth(nextDate.getMonth() + interval);
-tasks.push({ vehicle, vehicleNumber, imageUrl, taskType, lastDate: lastDate.toISOString(), interval, nextDate: nextDate.toISOString() });
-localStorage.setItem('tasks', JSON.stringify(tasks));
-renderDashboard();
-
-}
-
-function markCompleted(vehicle, taskType) { let task = tasks.find(t => t.vehicle === vehicle && t.taskType === taskType); if (task) { let newLastDate = new Date(task.nextDate); let newNextDate = new Date(newLastDate); newNextDate.setMonth(newNextDate.getMonth() + task.interval); task.lastDate = newLastDate.toISOString(); task.nextDate = newNextDate.toISOString(); localStorage.setItem('tasks', JSON.stringify(tasks)); renderDashboard(); } }
-
-function toggleTaskList(id) { let el = document.getElementById(id); el.style.display = el.style.display === 'block' ? 'none' : 'block'; }
-
-function renderDashboard() { let dashboard = document.getElementById('dashboard'); dashboard.innerHTML = ''; let today = new Date();
-
-let grouped = {};
-tasks.forEach(t => {
-    if (!grouped[t.vehicle + '|' + t.vehicleNumber]) grouped[t.vehicle + '|' + t.vehicleNumber] = [];
-    grouped[t.vehicle + '|' + t.vehicleNumber].push(t);
-});
-
-let sortedVehicles = Object.keys(grouped).sort((a, b) => {
-    let nextA = Math.min(...grouped[a].map(t => new Date(t.nextDate).getTime()));
-    let nextB = Math.min(...grouped[b].map(t => new Date(t.nextDate).getTime()));
-    return nextA - nextB;
-});
-
-sortedVehicles.forEach((key, idx) => {
-    let [vehicle, number] = key.split('|');
-    let vehicleTasks = grouped[key].sort((a, b) => new Date(a.nextDate) - new Date(b.nextDate));
-    let nearest = vehicleTasks[0];
-    let diffDays = Math.floor((new Date(nearest.nextDate) - today) / (1000*60*60*24));
-
-    let card = document.createElement('div');
-    card.className = 'card';
-    if (diffDays <= 7 && diffDays >= 0) card.classList.add('due-soon');
-    if (diffDays < 0) card.classList.add('overdue');
-    card.onclick = () => toggleTaskList('tasks_' + idx);
-
-    card.innerHTML = `<div class='vehicle-header'>
-            <img src='${nearest.imageUrl || ''}' class='vehicle-image' alt='Vehicle Image'>
-            <div class='vehicle-info'>
-                <strong style="font-size:18px;">${vehicle}</strong><br>
-                <span style='color:#555;'>No: ${number}</span><br>
-                <span style="color:#555;">Nearest Task:</span> <strong>${nearest.taskType}</strong> - ${new Date(nearest.nextDate).toDateString()} <span style="color:#888;">(${diffDays} days left)</span>
-            </div>
+    <div class="tabs">
+      <div class="tab active" data-tab="dashboard">🏠 Dashboard</div>
+      <div class="tab" data-tab="vehicles">🚐 Vehicles</div>
+      <div class="tab" data-tab="history">📜 History</div>
+      <div class="tab" data-tab="settings">⚙️ Settings</div>
+    </div>
+  </header>  <div class="wrap">
+    <!-- DASHBOARD -->
+    <section id="dashboard" class="page">
+      <div class="controls">
+        <input id="search" placeholder="Search vehicle name or number…" />
+        <select id="filter">
+          <option value="all">All statuses</option>
+          <option value="ok">Safe</option>
+          <option value="warn">Due soon</option>
+          <option value="bad">Overdue</option>
+        </select>
+        <select id="sort">
+          <option value="nearest">Sort: Nearest due</option>
+          <option value="alpha">Sort: A → Z</option>
+        </select>
+        <div style="display:flex;gap:8px">
+          <button class="btn ghost" id="exportBtn">Export</button>
+          <label class="btn ghost" for="importFile" style="display:flex;align-items:center;gap:8px;justify-content:center">Import<input type="file" id="importFile" accept="application/json" style="display:none"/></label>
         </div>
-        <div class="task-list" id="tasks_${idx}">
-            ${vehicleTasks.map(t => {
-                let d = Math.floor((new Date(t.nextDate) - today) / (1000*60*60*24));
-                return `<div><strong>${t.taskType}</strong> - ${new Date(t.nextDate).toDateString()} <span style='color:#777'>(${d} days left)</span>
-                    <button class='task-button' onclick=\"event.stopPropagation();markCompleted('${t.vehicle}','${t.taskType}')\">Mark Completed</button></div>`;
-            }).join('')}
-        </div>`;
+      </div>
+      <div id="dashboardList"></div>
+    </section><!-- VEHICLES -->
+<section id="vehicles" class="page" style="display:none">
+  <div class="row" style="padding-left:0"><div class="title">All Vehicles</div></div>
+  <div id="vehicleGrid" class="grid"></div>
+</section>
 
-    dashboard.appendChild(card);
-});
+<!-- HISTORY -->
+<section id="history" class="page" style="display:none">
+  <div class="row" style="padding-left:0"><div class="title">History</div></div>
+  <div style="overflow:auto">
+    <table>
+      <thead>
+        <tr><th>When</th><th>Vehicle</th><th>Number</th><th>Task</th><th>Period</th></tr>
+      </thead>
+      <tbody id="historyTbody"></tbody>
+    </table>
+  </div>
+</section>
 
+<!-- SETTINGS -->
+<section id="settings" class="page" style="display:none">
+  <div class="row" style="padding-left:0"><div class="title">Settings</div></div>
+  <div class="card" style="padding:14px">
+    <div class="form-grid">
+      <div>
+        <label>Default alert days</label>
+        <input id="defaultAlert" type="number" min="1" value="7" />
+      </div>
+      <div>
+        <label>Theme</label>
+        <select id="themeSelect">
+          <option value="dark">Dark</option>
+          <option value="light">Light</option>
+        </select>
+      </div>
+      <div>
+        <button class="btn red" id="clearData">Clear All Data</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+  </div>  <!-- Floating Add Button --><button class="fab" id="fab">+</button>
+
+  <!-- Bottom nav (mobile friendly quick nav) -->  <div class="bottom">
+    <div class="navbtn active" data-tab="dashboard">🏠<div>Dashboard</div></div>
+    <div class="navbtn" data-tab="vehicles">🚐<div>Vehicles</div></div>
+    <div class="navbtn" data-tab="history">📜<div>History</div></div>
+    <div class="navbtn" data-tab="settings">⚙️<div>Settings</div></div>
+  </div>  <!-- Add/Edit Vehicle Modal -->  <div class="overlay" id="overlay">
+    <div class="modal">
+      <div class="head">
+        <div class="title" id="formTitle">Add Vehicle / Tasks</div>
+        <button class="btn ghost" id="closeModal">Close</button>
+      </div>
+      <div class="body">
+        <div class="form-grid">
+          <div>
+            <label>Vehicle Name</label>
+            <input id="vehicleName" placeholder="e.g., Bus A (Senior Wing)" />
+          </div>
+          <div>
+            <label>Vehicle Number</label>
+            <input id="vehicleNumber" placeholder="e.g., KL-07-AB-1234" />
+          </div>
+          <div>
+            <label>Vehicle Image</label>
+            <input type="file" id="vehicleImage" accept="image/*" />
+          </div>
+          <div>
+            <label>Default Alert (days)</label>
+            <input type="number" id="vehicleAlertDays" min="1" />
+          </div>
+        </div>
+        <div style="height:10px"></div>
+        <div class="sub">Tasks for this vehicle (add multiple):</div>
+        <div id="taskListForVehicle" class="task-matrix"></div>
+        <button class="btn ghost" id="addTaskRow">+ Add Task</button>
+        <div style="height:12px"></div>
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+          <button class="btn" id="saveVehicle">Save</button>
+        </div>
+      </div>
+    </div>
+  </div><script>
+/***************************
+ * Data Model (reduced redundancy)
+ * - vehicles: {id, name, number, imageData, defaultAlertDays}
+ * - tasks: {id, vehicleId, type, lastDateISO, intervalMonths, alertDays, nextDateISO}
+ * - history: {id, vehicleId, type, completedOnISO, periodStartISO, periodEndISO}
+ * - settings: { defaultAlertDays, theme }
+ ***************************/
+const STORAGE_KEY = 'sbm_manager_v1';
+const state = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+let vehicles = state.vehicles || [];
+let tasks = state.tasks || [];
+let history = state.history || [];
+let settings = state.settings || { defaultAlertDays: 7, theme: 'dark' };
+let editingVehicleId = null; // null => create new vehicle
+
+function persist(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({vehicles, tasks, history, settings}));
 }
 
-renderDashboard(); </script>
+// --- Utils ---
+const $ = sel => document.querySelector(sel);
+const $$ = sel => Array.from(document.querySelectorAll(sel));
+const uid = () => Math.random().toString(36).slice(2,9) + Date.now().toString(36).slice(-4);
+const fmt = (d)=> new Date(d).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});
+function addMonthsISO(dateISO, m){ const d=new Date(dateISO); const day=d.getDate(); d.setMonth(d.getMonth()+m); if(d.getDate()<day) d.setDate(0); return d.toISOString(); }
+function daysBetween(a,b){ return Math.floor((b-a)/(1000*60*60*24)); }
+function percentElapsed(lastISO,nextISO,now){ const total=(new Date(nextISO)-new Date(lastISO)); const done=Math.max(0,Math.min(total,(now-new Date(lastISO)))); return total? (done/total)*100 : 100; }
+function fileToDataUrl(file){ return new Promise(res=>{ if(!file){res('');return;} const r=new FileReader(); r.onload=()=>res(r.result); r.readAsDataURL(file); }); }
 
-</body>
+// --- Status helpers ---
+function statusForTask(t, today){
+  const dd = daysBetween(today, new Date(t.nextDateISO));
+  const alert = t.alertDays ?? settings.defaultAlertDays;
+  if(dd < 0) return {key:'bad', label:'Overdue', days:dd};
+  if(dd <= alert) return {key:'warn', label:'Due soon', days:dd};
+  return {key:'ok', label:'Safe', days:dd};
+}
+
+/***************** TAB NAVIGATION *****************/
+function setActiveTab(tab){
+  $$('.tab').forEach(t=>t.classList.toggle('active', t.dataset.tab===tab));
+  $$('.page').forEach(p=>p.style.display = (p.id===tab? 'block':'none'));
+  $$('.navbtn').forEach(n=>n.classList.toggle('active', n.dataset.tab===tab));
+  if(tab==='dashboard') renderDashboard();
+  if(tab==='vehicles') renderVehicles();
+  if(tab==='history') renderHistory();
+  if(tab==='settings') renderSettings();
+}
+
+/***************** RENDER: DASHBOARD *****************/
+function renderDashboard(){
+  const list = $('#dashboardList');
+  list.innerHTML='';
+  const q = $('#search').value.toLowerCase();
+  const filter = $('#filter').value;
+  const sort = $('#sort').value;
+  const today = new Date();
+
+  // Group tasks by vehicle
+  const byVehicle = new Map();
+  tasks.forEach(t=>{
+    const v = vehicles.find(v=>v.id===t.vehicleId);
+    if(!v) return; // dangling
+    if(q && !(v.name.toLowerCase().includes(q) || v.number.toLowerCase().includes(q))) return;
+    const st = statusForTask(t, today);
+    if(filter!=='all' && st.key!==filter) return;
+    (byVehicle.get(v.id) || byVehicle.set(v.id, []).get(v.id)).push({...t, _status:st});
+  });
+
+  // Sort vehicles by nearest due or alpha
+  const keys = Array.from(byVehicle.keys());
+  keys.sort((a,b)=>{
+    if(sort==='alpha'){
+      const va=vehicles.find(v=>v.id===a), vb=vehicles.find(v=>v.id===b);
+      return (va?.name||'').localeCompare(vb?.name||'');
+    }
+    const nextA = Math.min(...byVehicle.get(a).map(x=>new Date(x.nextDateISO).getTime()));
+    const nextB = Math.min(...byVehicle.get(b).map(x=>new Date(x.nextDateISO).getTime()));
+    return nextA-nextB;
+  });
+
+  if(keys.length===0){
+    const empty=document.createElement('div');
+    empty.className='sub';
+    empty.style.padding='12px';
+    empty.textContent='No tasks match your filters yet. Click the + button to add a vehicle.';
+    list.appendChild(empty);
+    return;
+  }
+
+  keys.forEach((vid, idx)=>{
+    const v = vehicles.find(v=>v.id===vid);
+    const arr = byVehicle.get(vid).sort((a,b)=> new Date(a.nextDateISO)-new Date(b.nextDateISO));
+    const nearest = arr[0];
+    const st = nearest._status;
+    const percent = percentElapsed(nearest.lastDateISO, nearest.nextDateISO, today);
+    const barClass = st.key==='bad'?'bad':(st.key==='warn'?'warn':'ok');
+
+    const card = document.createElement('div');
+    card.className='card clickable';
+    card.addEventListener('click',()=>{
+      const el=document.getElementById('exp_'+idx); el.style.display = el.style.display==='block'?'none':'block';
+    });
+    card.innerHTML = `
+      <div class="row">
+        <img class="vehicle-img" src="${v.imageData||''}" alt="vehicle"/>
+        <div class="grow">
+          <div class="title">${v.name}</div>
+          <div class="sub">No: <span class="bold">${v.number}</span></div>
+          <div class="sub" style="margin-top:6px">
+            <span class="status ${st.key}">● ${st.label}</span>
+            <span>&nbsp; | Next: <span class="bold">${nearest.type}</span> on <span class="bold">${fmt(nearest.nextDateISO)}</span> — <span class="days bold ${st.key==='bad'?'bad':''}">${st.days} days</span></span>
+          </div>
+          <div class="progress" style="margin-top:10px"><div class="bar ${barClass}" style="width:${Math.min(100,Math.max(0,percent)).toFixed(0)}%"></div></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <button class="btn green" onclick="event.stopPropagation();markCompleted('${nearest.id}')">Mark Done</button>
+          <button class="btn ghost" onclick="event.stopPropagation();openEditVehicle('${v.id}')">Edit</button>
+        </div>
+      </div>
+      <div class="expand" id="exp_${idx}">
+        ${arr.map(t=>{
+          const s=t._status; const cls=s.key==='bad'?'bad':(s.key==='warn'?'warn':'ok');
+          return `
+            <div class='task-row'>
+              <div style="min-width:100px" class="status ${s.key}">● ${s.label}</div>
+              <div class="grow">
+                <div class="bold">${t.type}</div>
+                <div class="sub">Last: ${fmt(t.lastDateISO)} • Next: <span class="bold">${fmt(t.nextDateISO)}</span> • Every ${t.intervalMonths} mo • Alert: ${t.alertDays ?? settings.defaultAlertDays}d</div>
+                <div class="progress" style="margin-top:6px"><div class="bar ${cls}" style="width:${Math.min(100,Math.max(0,percentElapsed(t.lastDateISO,t.nextDateISO,new Date()))).toFixed(0)}%"></div></div>
+              </div>
+              <div style="display:flex;gap:6px">
+                <button class="btn green" onclick="markCompleted('${t.id}')">Done</button>
+                <button class="btn ghost" onclick="openEditVehicle('${v.id}')">Edit</button>
+                <button class="btn red" onclick="removeTask('${t.id}')">Delete</button>
+              </div>
+            </div>`;
+        }).join('')}
+      </div>
+    `;
+    list.appendChild(card);
+  });
+}
+
+/***************** RENDER: VEHICLES *****************/
+function renderVehicles(){
+  const grid = $('#vehicleGrid');
+  grid.innerHTML='';
+  if(!vehicles.length){ grid.innerHTML = '<div class="sub">No vehicles yet.</div>'; return; }
+  vehicles.sort((a,b)=> a.name.localeCompare(b.name));
+  vehicles.forEach(v=>{
+    const vTasks = tasks.filter(t=>t.vehicleId===v.id).sort((a,b)=> new Date(a.nextDateISO)-new Date(b.nextDateISO));
+    const next = vTasks[0];
+    const status = next? statusForTask(next, new Date()) : {key:'ok',label:'No tasks',days:'—'};
+    const card=document.createElement('div');
+    card.className='card vehicle-card';
+    card.innerHTML=`
+      <div class="row">
+        <img class="vehicle-img" src="${v.imageData||''}" alt="${v.name}" />
+        <div class="grow">
+          <div class="title">${v.name}</div>
+          <div class="sub">No: <span class="bold">${v.number}</span></div>
+          <div class="sub" style="margin-top:6px"><span class="status ${status.key}">● ${status.label}</span> ${next?` | Next: <b>${next.type}</b> on <b>${fmt(next.nextDateISO)}</b>`:''}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <button class="btn" onclick="openEditVehicle('${v.id}')">Edit</button>
+          <button class="btn red" onclick="removeVehicle('${v.id}')">Delete</button>
+        </div>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+/***************** RENDER: HISTORY *****************/
+function renderHistory(){
+  const tbody = $('#historyTbody');
+  tbody.innerHTML='';
+  const rows = history
+    .sort((a,b)=> new Date(b.completedOnISO)-new Date(a.completedOnISO))
+    .map(h=>{
+      const v = vehicles.find(v=>v.id===h.vehicleId);
+      return `<tr>
+        <td>${fmt(h.completedOnISO)}</td>
+        <td>${v?.name||'–'}</td>
+        <td>${v?.number||'–'}</td>
+        <td>${h.type}</td>
+        <td>${fmt(h.periodStartISO)} → ${fmt(h.periodEndISO)}</td>
+      </tr>`
+    }).join('');
+  tbody.innerHTML = rows || '<tr><td class="sub" colspan="5">No history yet.</td></tr>';
+}
+
+/***************** RENDER: SETTINGS *****************/
+function renderSettings(){
+  $('#defaultAlert').value = settings.defaultAlertDays;
+  $('#themeSelect').value = settings.theme;
+}
+
+/***************** MODAL + FORM *****************/
+function openModal(){ $('#overlay').style.display='flex'; }
+function closeModal(){ $('#overlay').style.display='none'; clearVehicleForm(); editingVehicleId=null; }
+
+function clearVehicleForm(){
+  $('#vehicleName').value='';
+  $('#vehicleNumber').value='';
+  $('#vehicleAlertDays').value='';
+  $('#vehicleImage').value='';
+  $('#taskListForVehicle').innerHTML='';
+}
+
+function addTaskRow(pref={}){
+  const row=document.createElement('div');
+  row.className='chip';
+  row.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 130px 120px 110px auto;gap:8px;width:100%">
+      <input list="taskTypes" placeholder="Task Type" value="${pref.type||''}" />
+      <input type="date" value="${pref.lastDateISO? new Date(pref.lastDateISO).toISOString().slice(0,10):''}" />
+      <input type="number" min="1" placeholder="Interval (mo)" value="${pref.intervalMonths||12}" />
+      <input type="number" min="1" placeholder="Alert (days)" value="${pref.alertDays||''}" />
+      <button class="btn red" type="button">Remove</button>
+    </div>`;
+  row.querySelector('button').onclick=()=> row.remove();
+  $('#taskListForVehicle').appendChild(row);
+}
+
+function openCreateVehicle(){
+  $('#formTitle').textContent='Add Vehicle / Tasks';
+  clearVehicleForm();
+  // Prefill with common tasks for convenience
+  const common=[
+    {type:'Insurance', intervalMonths:12},
+    {type:'Fitness Test', intervalMonths:12},
+    {type:'Extinguisher Refill', intervalMonths:12},
+    {type:'Pollution Test', intervalMonths:6},
+    {type:'First Aid Kit Replacement', intervalMonths:6},
+    {type:'Taxes', intervalMonths:12},
+  ];
+  common.forEach(c=>addTaskRow(c));
+  openModal();
+}
+
+function openEditVehicle(vid){
+  const v = vehicles.find(x=>x.id===vid);
+  if(!v) return;
+  editingVehicleId = vid;
+  $('#formTitle').textContent='Edit Vehicle / Tasks';
+  $('#vehicleName').value=v.name;
+  $('#vehicleNumber').value=v.number;
+  $('#vehicleAlertDays').value=v.defaultAlertDays||'';
+  $('#taskListForVehicle').innerHTML='';
+  tasks.filter(t=>t.vehicleId===vid).forEach(t=> addTaskRow({type:t.type,lastDateISO:t.lastDateISO,intervalMonths:t.intervalMonths,alertDays:t.alertDays}));
+  openModal();
+}
+
+async function saveVehicle(){
+  const name=$('#vehicleName').value.trim();
+  const number=$('#vehicleNumber').value.trim();
+  const defAlert=parseInt($('#vehicleAlertDays').value||settings.defaultAlertDays||7);
+  if(!name||!number){ alert('Please fill vehicle name and number'); return; }
+  const file=$('#vehicleImage').files[0];
+  const imgData = await fileToDataUrl(file);
+
+  let vid = editingVehicleId || uid();
+  const existing = vehicles.find(v=>v.id===vid);
+  if(existing){
+    existing.name=name; existing.number=number; existing.defaultAlertDays=defAlert; existing.imageData = imgData || existing.imageData || '';
+  }else{
+    vehicles.push({id:vid,name,number,defaultAlertDays:defAlert,imageData:imgData||''});
+  }
+
+  // Read tasks from rows
+  const rows = Array.from($('#taskListForVehicle').children);
+  const newTasks=[];
+  rows.forEach(r=>{
+    const [typeInput,lastInput,intInput,alertInput] = r.querySelectorAll('input');
+    const type=typeInput.value.trim();
+    if(!type) return;
+    const lastISO = lastInput.value ? new Date(lastInput.value).toISOString() : new Date().toISOString();
+    const interval = parseInt(intInput.value||'12');
+    const alert = parseInt(alertInput.value||'');
+    const nextISO = addMonthsISO(lastISO, interval);
+    newTasks.push({id:uid(), vehicleId:vid, type, lastDateISO:lastISO, intervalMonths:interval, alertDays:isNaN(alert)?undefined:alert, nextDateISO:nextISO});
+  });
+
+  // Replace tasks for this vehicle (de-duplicate)
+  tasks = tasks.filter(t=>t.vehicleId!==vid).concat(newTasks);
+  persist();
+  closeModal();
+  setActiveTab('vehicles');
+}
+
+/***************** ACTIONS *****************/
+function markCompleted(taskId){
+  const idx = tasks.findIndex(t=>t.id===taskId);
+  if(idx===-1) return;
+  const t = tasks[idx];
+  if(!confirm(`Mark ${t.type} as completed and move to next cycle?`)) return;
+  const completedOn = new Date().toISOString();
+  history.push({id:uid(), vehicleId:t.vehicleId, type:t.type, completedOnISO:completedOn, periodStartISO:t.lastDateISO, periodEndISO:t.nextDateISO});
+  t.lastDateISO = t.nextDateISO;
+  t.nextDateISO = addMonthsISO(t.lastDateISO, t.intervalMonths);
+  persist();
+  renderDashboard(); renderHistory();
+}
+
+function removeTask(taskId){
+  if(!confirm('Delete this task?')) return;
+  tasks = tasks.filter(t=>t.id!==taskId);
+  persist();
+  renderDashboard(); renderVehicles();
+}
+
+function removeVehicle(vid){
+  if(!confirm('Delete vehicle and all its tasks?')) return;
+  vehicles = vehicles.filter(v=>v.id!==vid);
+  tasks = tasks.filter(t=>t.vehicleId!==vid);
+  history = history.filter(h=>h.vehicleId!==vid);
+  persist();
+  renderVehicles(); renderDashboard(); renderHistory();
+}
+
+/***************** NOTIFICATIONS *****************/
+async function enableNotifications(){
+  try{
+    const res = await Notification.requestPermission();
+    if(res!=='granted') alert('Notifications blocked. Enable them in your browser settings to get alerts.');
+  }catch{ alert('Notifications are not supported in this browser.'); }
+}
+
+function notifyDue(){
+  if(!('Notification' in window) || Notification.permission!=='granted') return;
+  const today=new Date();
+  tasks.forEach(t=>{
+    const v=vehicles.find(v=>v.id===t.vehicleId); if(!v) return;
+    const dd = daysBetween(today,new Date(t.nextDateISO));
+    const alertDaysVal = t.alertDays ?? (v.defaultAlertDays || settings.defaultAlertDays || 7);
+    if(dd<=alertDaysVal && dd>=0){
+      const nid=`${t.id}|${new Date().toDateString()}`;
+      if(localStorage.getItem('n_'+nid)) return;
+      new Notification(`${v.name} (${v.number})`, { body: `${t.type} due in ${dd} day(s) • ${fmt(t.nextDateISO)}` });
+      localStorage.setItem('n_'+nid, '1');
+    }
+  });
+}
+setInterval(notifyDue, 60*1000);
+
+/***************** EXPORT / IMPORT *****************/
+function exportData(){
+  const blob = new Blob([JSON.stringify({vehicles,tasks,history,settings}, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download='school-bus-maintenance.json'; a.click(); URL.revokeObjectURL(url);
+}
+function importData(file){
+  const r=new FileReader();
+  r.onload=()=>{ try{ const obj=JSON.parse(r.result); vehicles=obj.vehicles||[]; tasks=obj.tasks||[]; history=obj.history||[]; settings=obj.settings||settings; persist(); setActiveTab('dashboard'); } catch{ alert('Invalid file'); } };
+  r.readAsText(file);
+}
+
+/***************** SETTINGS *****************/
+function applyTheme(){
+  const root=document.documentElement; root.classList.toggle('light', settings.theme==='light');
+}
+
+/***************** WIRING *****************/
+window.addEventListener('DOMContentLoaded',()=>{
+  // Tabs
+  $$('.tab').forEach(t=> t.addEventListener('click', ()=> setActiveTab(t.dataset.tab)) );
+  $$('.navbtn').forEach(n=> n.addEventListener('click', ()=> setActiveTab(n.dataset.tab)) );
+
+  // Dashboard controls
+  $('#search').addEventListener('input', renderDashboard);
+  $('#filter').addEventListener('change', renderDashboard);
+  $('#sort').addEventListener('change', renderDashboard);
+  $('#exportBtn').addEventListener('click', exportData);
+  $('#importFile').addEventListener('change', e=>{ if(e.target.files[0]) importData(e.target.files[0]); });
+
+  // Buttons
+  $('#fab').addEventListener('click', openCreateVehicle);
+  $('#closeModal').addEventListener('click', closeModal);
+  $('#addTaskRow').addEventListener('click', ()=> addTaskRow({}));
+  $('#saveVehicle').addEventListener('click', saveVehicle);
+  $('#notifyBtn').addEventListener('click', enableNotifications);
+  $('#themeBtn').addEventListener('click', ()=>{ settings.theme = (settings.theme==='light'?'dark':'light'); applyTheme(); persist(); });
+
+  // Settings
+  $('#defaultAlert').addEventListener('change', e=>{ settings.defaultAlertDays=parseInt(e.target.value||'7'); persist(); });
+  $('#themeSelect').addEventListener('change', e=>{ settings.theme=e.target.value; applyTheme(); persist(); });
+  $('#clearData').addEventListener('click', ()=>{ if(confirm('This will erase all vehicles, tasks and history. Continue?')){ vehicles=[]; tasks=[]; history=[]; persist(); setActiveTab('dashboard'); }});
+
+  // Datalist for task types
+  const dl=document.createElement('datalist'); dl.id='taskTypes'; dl.innerHTML = ['Insurance','Fitness Test','Extinguisher Refill','Pollution Test','First Aid Kit Replacement','Taxes'].map(x=>`<option value="${x}">`).join(''); document.body.appendChild(dl);
+
+  // Init
+  applyTheme();
+  setActiveTab('dashboard');
+  notifyDue();
+});
+</script></body>
 </html>
