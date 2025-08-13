@@ -1,720 +1,90 @@
-<!DOCTYPE html>
-<html lang="en">
-
+<!DOCTYPE html><html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GTA IV Radio - YouTube Edition</title>
-    <link rel="icon" type="image/x-icon" href="icons/radio.svg"> <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background: radial-gradient(circle at center, #1a1a1a 0%, #0d0d0d 100%);
-            color: #e2e8f0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-
-        .radio-container {
-            background-color: rgba(51, 51, 51, 0.6);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
-            max-width: 600px;
-            width: 100%;
-            text-align: center;
-            border: none;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding-left: 15px;
-            padding-right: 15px;
-            margin-top: 50px;
-        }
-
-        .icon-carousel {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 20px;
-            gap: 10px;
-        }
-
-        @media (max-width: 480px) {
-            .icon-carousel {
-                gap: 5px;
-            }
-        }
-
-        .station-icon-base {
-            object-fit: contain;
-            transition: opacity 0.15s ease-in-out, transform 0.15s ease-in-out;
-            flex-shrink: 0;
-        }
-
-        .station-icon-outer-faded {
-            width: clamp(40px, 15vw, 80px);
-            height: clamp(40px, 15vw, 80px);
-            opacity: 0.15;
-        }
-
-        .station-icon-faded {
-            width: clamp(60px, 20vw, 100px);
-            height: clamp(60px, 20vw, 100px);
-            opacity: 0.4;
-        }
-
-        .station-icon {
-            width: clamp(80px, 30vw, 160px);
-            height: clamp(80px, 30vw, 160px);
-            opacity: 1;
-        }
-
-        .station-icon:hover {
-            transform: scale(1.05);
-        }
-
-        .station-name-display {
-            font-size: clamp(1.2rem, 5vw, 2.5rem);
-            font-weight: 800;
-            color: #4299e1;
-            margin-bottom: 20px;
-            text-shadow: 0 0 10px rgba(66, 153, 225, 0.5);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 100%;
-        }
-
-        .radio-controls {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            gap: 1rem;
-        }
-
-        @media (max-width: 640px) {
-            .radio-controls {
-                gap: 0.75rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .radio-controls {
-                gap: 0.5rem;
-            }
-        }
-
-        .control-button {
-            background-color: #4a5568;
-            color: #e2e8f0;
-            border-radius: 8px;
-            font-weight: 600;
-            transition: all 0.2s ease-in-out;
-            cursor: pointer;
-            border: none;
-            outline: none;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-grow: 1;
-            flex-shrink: 1;
-            min-width: 48px;
-            max-width: 80px;
-            height: 50px;
-            padding: 0;
-        }
-
-        .control-button:hover {
-            background-color: #636b77;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.4);
-        }
-
-        .control-button:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-        }
-
-        #play-pause-button {
-            min-width: 60px;
-            max-width: 100px;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        .toast-message {
-            position: fixed;
-            top: 150px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
-            z-index: 1000;
-            white-space: nowrap;
-        }
-
-        .toast-message.show {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .play-icon,
-        .pause-icon,
-        .prev-icon,
-        .next-icon {
-            fill: white;
-            width: 24px;
-            height: 24px;
-        }
-
-        /* Styles to hide the YouTube player */
-        #youtube-player-container {
-            position: absolute;
-            top: -9999px;
-            left: -9999px;
-            width: 1px; /* Minimal size to allow API to function */
-            height: 1px;
-            overflow: hidden;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>School Bus Maintenance Dashboard</title>
+<style>
+    body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 0; }
+    header { background: #2c3e50; color: white; padding: 15px; text-align: center; }
+    .container { width: 90%; margin: auto; margin-top: 20px; }
+    .card { background: white; padding: 15px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .due-soon { background-color: #fff3cd; }
+    .overdue { background-color: #f8d7da; }
+    h2 { margin-top: 0; }
+    label { display: block; margin-top: 10px; }
+    input, select { padding: 5px; width: 100%; margin-top: 5px; }
+    button { margin-top: 10px; padding: 10px; background: #27ae60; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    button:hover { background: #219150; }
+</style>
 </head>
-
-<body class="antialiased">
-    <div class="radio-container">
-        <h1 class="text-3xl font-bold mb-6 text-blue-400">GTA IV Radio - YT</h1>
-
-        <div class="icon-carousel">
-            <img id="prev-prev-station-icon" src="https://placehold.co/60x60/6B7280/FFFFFF?text=P-P" alt="Previous Previous Station Icon"
-                class="station-icon-outer-faded station-icon-base">
-            <img id="prev-station-icon" src="https://placehold.co/80x80/6B7280/FFFFFF?text=Prev" alt="Previous Station Icon" class="station-icon-faded station-icon-base">
-            <img id="current-station-icon" src="https://placehold.co/120x120/4299e1/ffffff?text=Icon" alt="Current Station Icon" class="station-icon station-icon-base">
-            <img id="next-station-icon" src="https://placehold.co/80x80/6B7280/FFFFFF?text=Next" alt="Next Station Icon" class="station-icon-faded station-icon-base">
-            <img id="next-next-station-icon" src="https://placehold.co/60x60/6B7280/FFFFFF?text=N-N" alt="Next Next Station Icon"
-                class="station-icon-outer-faded station-icon-base">
-        </div>
-
-        <div class="mb-6">
-            <p class="text-lg font-semibold mb-2">Now Playing:</p>
-            <p id="current-station-name" class="station-name-display">Select a Station</p>
-        </div>
-
-        <div id="youtube-player-container">
-            <div id="youtube-player"></div>
-        </div>
-        <div class="flex items-center justify-center w-full radio-controls">
-            <button id="prev-button" class="control-button">
-                <svg class="prev-icon" viewBox="0 0 24 24">
-                    <path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z" />
-                </svg>
-            </button>
-            <button id="play-pause-button" class="control-button">
-                <svg id="play-icon" class="play-icon" viewBox="0 0 24 24">
-                    <path d="M8 5v14l11-7z" />
-                </svg>
-                <svg id="pause-icon" class="pause-icon hidden" viewBox="0 0 24 24">
-                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
-                </svg>
-            </button>
-            <button id="next-button" class="control-button">
-                <svg class="next-icon" viewBox="0 0 24 24">
-                    <path d="M8.59 16.59L13.17 12l-4.58-4.59L10 6l6 6-6 6z" />
-                </svg>
-            </button>
-        </div>
-
-        <div id="toast-message" class="toast-message"></div>
-
+<body>
+<header>
+    <h1>School Bus Maintenance Dashboard</h1>
+</header>
+<div class="container">
+    <h2>Add Vehicle</h2>
+    <div class="card">
+        <label>Vehicle Name/Number:</label>
+        <input type="text" id="vehicleName">
+        <label>Task Type:</label>
+        <select id="taskType">
+            <option>Insurance</option>
+            <option>Fitness Test</option>
+            <option>Extinguisher Refill</option>
+            <option>Pollution Test</option>
+            <option>First Aid Kit Replacement</option>
+            <option>Taxes</option>
+        </select>
+        <label>Last Renewal Date:</label>
+        <input type="date" id="lastDate">
+        <label>Renewal Interval (months):</label>
+        <input type="number" id="interval" min="1" value="12">
+        <button onclick="addVehicle()">Add Vehicle Task</button>
     </div>
+    <h2>Upcoming Tasks</h2>
+    <div id="taskList"></div>
+</div>
+<script>
+let tasks = JSON.parse(localStorage.getItem('tasks')) || [];function addVehicle() { let vehicle = document.getElementById('vehicleName').value.trim(); let taskType = document.getElementById('taskType').value; let lastDate = new Date(document.getElementById('lastDate').value); let interval = parseInt(document.getElementById('interval').value);
 
-    <script src="https://www.youtube.com/iframe_api"></script>
-    <script>
-        // IMPORTANT: Replace these video IDs with actual YouTube video IDs for your radio stations.
-        // These are placeholders. Some might be live streams which behave differently.
-        // For best results, use IDs of long music mixes or playlists that are not live.
-        const radioStations = [
-            { name: 'The Beat 102.7', videoId: 'TcU3f6OX6gA', icon: 'icons/The_Beat-GTAIV.webp' }, // Lofi Girl (Live)
-            { name: 'The Classics 104.1', videoId: 'j3t_hl30t8o', icon: 'icons/TheClassics.webp' }, // Non Stop Oldies
-            { name: 'Electro-Choc', videoId: 'REDSOKDotCg', icon: 'icons/Electrochock.webp' }, // Classical Music
-            { name: 'International Funk', videoId: '4xDzrQpsYSo', icon: 'icons/IF99.webp' }, // Placeholder
-            { name: 'Independence FM', videoId: '5qap5aO4i9A', icon: 'icons/IndependenceFM.webp' }, // Placeholder (Lofi)
-            { name: 'Integrity 2.0', videoId: 'DWcJFNfaw9c', icon: 'icons/Integrity.webp' }, // Placeholder (Synthwave)
-            { name: 'Jazz Nation Radio', videoId: 'Qt0_o5c6XhY', icon: 'icons/JazzNationRadio-GTAIV-Logo.webp' }, // Jazz
-            { name: 'The Journey', videoId: 'FjHGZj2IjBk', icon: 'icons/TheJourney.webp' }, // Ambient
-            { name: 'K109 The Studio', videoId: '6uddk10nesY', icon: 'icons/K109.webp' }, // Disco
-            { name: 'Liberty City Hardcore', videoId: '92XVwY54h5k', icon: 'icons/Lchc.webp' }, // Hardcore Punk Mix
-            { name: 'Liberty Rock Radio', videoId: 'a3Z7zEc7AXQ', icon: 'icons/Liberty_Rock_Radio.webp' }, // Classic Rock
-            { name: 'Massive B Soundsystem', videoId: 'Gz2Lyyq2cOs', icon: 'icons/MassiveBSoundsystem.webp' }, // Reggae
-            { name: 'Public Liberty Radio', videoId: 'H4c5y4jXN7Y', icon: 'icons/Public_Liberty_Radio.webp' }, // Talk (Placeholder)
-            { name: 'Radio Broker', videoId: 'UfcAVejslrU', icon: 'icons/Radio_Broker.webp' }, // Indie Rock
-            { name: 'RamJam FM', videoId: 'B_pWTmR01xI', icon: 'icons/RamJam_FM.webp' }, // Dancehall
-            { name: 'San Juan Sounds', videoId: 'PObvnIuH9sE', icon: 'icons/San_Juan_Sounds.webp' }, // Reggaeton
-            { name: 'Self-Actualization FM', videoId: 'XulFRa9TBgA', icon: 'icons/Self-Actualization_FM.webp' }, // Ambient/New Age
-            { name: 'Tuff Gong Radio', videoId: 'f2m29Ex2L9A', icon: 'icons/Tuff_Gong.webp' }, // Bob Marley (Live, might vary)
-            { name: 'The Vibe', videoId: '5YKmpeoTyko', icon: 'icons/TheVibe98.8.webp' }, // R&B
-            { name: 'Vice City FM', videoId: 'ERL2i9wL2pA', icon: 'icons/ViceCityFM.webp' }, // 80s Pop
-            { name: 'Vladivostok FM', videoId: 'e9o7h5vT3fc', icon: 'icons/VladivostokFM.webp' }, // Russian Pop
-            { name: 'WKTT Radio', videoId: 'dQw4w9WgXcQ', icon: 'icons/WKTTtalkradio.webp' } // Placeholder (Talk) - You know this one!
-        ];
+if (!vehicle || isNaN(lastDate.getTime())) {
+    alert('Please fill all fields correctly');
+    return;
+}
 
-        // DOM Elements
-        const currentStationNameDisplay = document.getElementById('current-station-name');
-        const currentStationIconDisplay = document.getElementById('current-station-icon');
-        const prevStationIconDisplay = document.getElementById('prev-station-icon');
-        const nextStationIconDisplay = document.getElementById('next-station-icon');
-        const prevPrevStationIconDisplay = document.getElementById('prev-prev-station-icon');
-        const nextNextStationIconDisplay = document.getElementById('next-next-station-icon');
-        const playPauseButton = document.getElementById('play-pause-button');
-        const playIcon = document.getElementById('play-icon');
-        const pauseIcon = document.getElementById('pause-icon');
-        const prevButton = document.getElementById('prev-button');
-        const nextButton = document.getElementById('next-button');
-        const toastMessageElement = document.getElementById('toast-message');
-        const radioContainer = document.querySelector('.radio-container');
+let nextDate = new Date(lastDate);
+nextDate.setMonth(nextDate.getMonth() + interval);
 
-        // YouTube Player variables
-        let player; // Will hold the YT.Player instance
-        let ytApiReady = false;
-        let playerReady = false;
-        let currentStationIndex = -1; // Index of the visually selected station
-        let actualPlayingStationIndex = -1; // Index of the station actually loaded/playing in YT player
-        let isNewTrackLoading = false; // Flag to manage random seek on new track load
-        let stationChangeTimeout; // For debouncing station changes
+tasks.push({ vehicle, taskType, lastDate: lastDate.toISOString(), interval, nextDate: nextDate.toISOString() });
+localStorage.setItem('tasks', JSON.stringify(tasks));
+renderTasks();
 
-        const STATION_CHANGE_DEBOUNCE_DELAY = 300; // ms
+}
 
-        let toastTimeout;
+function markCompleted(index) { let task = tasks[index]; let newLastDate = new Date(task.nextDate); let newNextDate = new Date(newLastDate); newNextDate.setMonth(newNextDate.getMonth() + task.interval); tasks[index].lastDate = newLastDate.toISOString(); tasks[index].nextDate = newNextDate.toISOString(); localStorage.setItem('tasks', JSON.stringify(tasks)); renderTasks(); }
 
-        // Called by YouTube API when it's loaded
-        function onYouTubeIframeAPIReady() {
-            console.log("YouTube IFrame API Ready");
-            ytApiReady = true;
-            player = new YT.Player('youtube-player', {
-                height: '1', // Minimal size, container is hidden
-                width: '1',  // Minimal size
-                playerVars: {
-                    'autoplay': 0, // Don't autoplay initial video
-                    'controls': 0, // Hide YouTube controls
-                    'iv_load_policy': 3, // Hide annotations
-                    'modestbranding': 1, // Reduce YouTube logo
-                    'playsinline': 1, // Important for iOS
-                    'disablekb': 1, // Disable keyboard controls for the iframe
-                    'fs':0 // disable fullscreen
-                },
-                events: {
-                    'onReady': onPlayerReady,
-                    'onStateChange': onPlayerStateChange,
-                    'onError': onPlayerError
-                }
-            });
-        }
+function renderTasks() { let list = document.getElementById('taskList'); list.innerHTML = ''; let today = new Date();
 
-        function onPlayerReady(event) {
-            console.log("YouTube Player Ready");
-            playerReady = true;
-            // Set playback quality for audio focus (lowest video bandwidth)
-            // 'tiny', 'small', 'medium', 'large', 'hd720', 'hd1080', 'highres'
-            // 'small' or 'tiny' are good for audio. 'tiny' might not be universally available.
-            try {
-                 event.target.setPlaybackQuality('small');
-            } catch(e) {
-                console.warn("Could not set playback quality 'small', trying 'tiny'", e);
-                try {
-                    event.target.setPlaybackQuality('tiny');
-                } catch (e2) {
-                    console.warn("Could not set playback quality 'tiny' either.", e2);
-                }
-            }
+tasks.sort((a,b) => new Date(a.nextDate) - new Date(b.nextDate));
 
-            // If a station was selected before player was ready, try to load it
-            if (currentStationIndex !== -1 && radioStations[currentStationIndex]) {
-                 // Do not auto play, just prepare if needed.
-                 // The user will press play.
-            }
-            enableControls();
-        }
+tasks.forEach((t, i) => {
+    let nextDate = new Date(t.nextDate);
+    let diffDays = Math.floor((nextDate - today) / (1000*60*60*24));
+    
+    let card = document.createElement('div');
+    card.className = 'card';
+    if (diffDays <= 7 && diffDays >= 0) card.classList.add('due-soon');
+    if (diffDays < 0) card.classList.add('overdue');
+    
+    card.innerHTML = `<strong>${t.vehicle}</strong> - ${t.taskType}<br>
+    Next Due: ${nextDate.toDateString()} (${diffDays} days left)
+    <br><button onclick="markCompleted(${i})">Mark Completed</button>`;
+    list.appendChild(card);
+});
 
-        function onPlayerStateChange(event) {
-            console.log("Player State Change:", event.data);
-            const station = radioStations[actualPlayingStationIndex];
+}
 
-            if (event.data === YT.PlayerState.PLAYING) {
-                playIcon.classList.add('hidden');
-                pauseIcon.classList.remove('hidden');
-                hideToast();
-                if (station) {
-                    showToast(`Playing: ${station.name}`, 2000);
-                }
+renderTasks(); </script>
 
-                // Random start for new tracks
-                if (isNewTrackLoading && player.getDuration && player.getDuration() > 0) {
-                    const duration = player.getDuration();
-                    // Avoid seeking on live streams (duration might be 0 or behave unexpectedly)
-                    // A common heuristic for live streams is duration being very small or 0.
-                    // Or check if videoId is known to be live. For now, simple duration check.
-                    if (duration > 1) { // Check if duration is somewhat valid
-                         const randomTime = Math.random() * duration;
-                         player.seekTo(randomTime, true);
-                         console.log(`Sought to random time: ${randomTime.toFixed(2)}s for ${station ? station.name : 'current track'}`);
-                    } else {
-                        console.log(`Not seeking for ${station ? station.name : 'current track'} (duration: ${duration}s - might be live or too short)`);
-                    }
-                }
-                isNewTrackLoading = false; // Reset flag after first play/seek
-                enableControls();
-            } else if (event.data === YT.PlayerState.PAUSED) {
-                playIcon.classList.remove('hidden');
-                pauseIcon.classList.add('hidden');
-                if (station) {
-                     showToast(`Paused: ${station.name}`, 2000);
-                }
-                enableControls();
-            } else if (event.data === YT.PlayerState.ENDED) {
-                playIcon.classList.remove('hidden');
-                pauseIcon.classList.add('hidden');
-                if (station) {
-                    showToast(`Station Ended: ${station.name}. Press Play.`, 3000);
-                } else {
-                    showToast(`Station Ended. Press Play.`, 3000);
-                }
-                currentStationNameDisplay.textContent = "Press Play";
-                enableControls();
-            } else if (event.data === YT.PlayerState.BUFFERING) {
-                showToast(`Buffering: ${station ? station.name : '...'}`, 1500, true);
-                disableControls(false); // Keep controls mostly enabled but show loading
-            } else if (event.data === YT.PlayerState.CUED) {
-                // Video is cued, ready to play.
-                // This is a good place to set isNewTrackLoading if not already playing.
-                if(player.getPlayerState() !== YT.PlayerState.PLAYING){
-                    isNewTrackLoading = true;
-                }
-                if (station) {
-                    showToast(`Ready: ${station.name}. Press Play.`, 2000);
-                }
-                enableControls();
-            }
-        }
-
-        function onPlayerError(event) {
-            console.error("YouTube Player Error:", event.data);
-            let errorMsg = "Player error. Try another station.";
-            const stationName = radioStations[actualPlayingStationIndex] ? radioStations[actualPlayingStationIndex].name : "the station";
-            switch (event.data) {
-                case 2: // Invalid parameter
-                    errorMsg = `Error loading ${stationName}: Invalid video ID.`;
-                    break;
-                case 5: // HTML5 player error
-                    errorMsg = `Error playing ${stationName} in HTML5 player.`;
-                    break;
-                case 100: // Video not found
-                    errorMsg = `${stationName} not found or removed.`;
-                    break;
-                case 101: // Playback not allowed
-                case 150: // Playback not allowed
-                    errorMsg = `Playback of ${stationName} is not allowed.`;
-                    break;
-                default:
-                    errorMsg = `Error with ${stationName}. Code: ${event.data}`;
-            }
-            showToast(errorMsg, 5000);
-            playIcon.classList.remove('hidden');
-            pauseIcon.classList.add('hidden');
-            enableControls();
-            // Attempt to clear the player to allow loading another video
-            if (player && typeof player.stopVideo === 'function') {
-                player.stopVideo(); // Stops and clears the video
-            }
-            actualPlayingStationIndex = -1; // Reset what's "loaded"
-        }
-
-        function showToast(message, duration = 2000, sticky = false) {
-            clearTimeout(toastTimeout);
-            toastMessageElement.textContent = message;
-            toastMessageElement.classList.add('show');
-            if (!sticky) {
-                toastTimeout = setTimeout(() => {
-                    toastMessageElement.classList.remove('show');
-                }, duration);
-            }
-        }
-
-        function hideToast() {
-            clearTimeout(toastTimeout);
-            toastMessageElement.classList.remove('show');
-        }
-
-        function disableControls(fully = true) {
-            playPauseButton.disabled = true;
-            if (fully) {
-                prevButton.disabled = true;
-                nextButton.disabled = true;
-            }
-        }
-
-        function enableControls() {
-            playPauseButton.disabled = false;
-            prevButton.disabled = false;
-            nextButton.disabled = false;
-        }
-
-        function updateIconCarousel(index) {
-            if (radioStations.length === 0) {
-                currentStationIconDisplay.src = "https://placehold.co/120x120/4299e1/ffffff?text=Icon";
-                prevStationIconDisplay.src = "https://placehold.co/80x80/6B7280/FFFFFF?text=Prev";
-                nextStationIconDisplay.src = "https://placehold.co/80x80/6B7280/FFFFFF?text=Next";
-                prevPrevStationIconDisplay.src = "https://placehold.co/60x60/6B7280/FFFFFF?text=P-P";
-                nextNextStationIconDisplay.src = "https://placehold.co/60x60/6B7280/FFFFFF?text=N-N";
-                return;
-            }
-
-            const getCircularIndex = (i, len) => (i % len + len) % len;
-            let displayIndex = index === -1 ? 0 : index;
-
-            currentStationIconDisplay.src = radioStations[displayIndex].icon;
-            currentStationIconDisplay.alt = `${radioStations[displayIndex].name} Icon`;
-
-            prevStationIconDisplay.src = radioStations[getCircularIndex(displayIndex - 1, radioStations.length)].icon;
-            prevStationIconDisplay.alt = `${radioStations[getCircularIndex(displayIndex - 1, radioStations.length)].name} Icon`;
-
-            nextStationIconDisplay.src = radioStations[getCircularIndex(displayIndex + 1, radioStations.length)].icon;
-            nextStationIconDisplay.alt = `${radioStations[getCircularIndex(displayIndex + 1, radioStations.length)].name} Icon`;
-
-            prevPrevStationIconDisplay.src = radioStations[getCircularIndex(displayIndex - 2, radioStations.length)].icon;
-            prevPrevStationIconDisplay.alt = `${radioStations[getCircularIndex(displayIndex - 2, radioStations.length)].name} Icon`;
-
-            nextNextStationIconDisplay.src = radioStations[getCircularIndex(displayIndex + 2, radioStations.length)].icon;
-            nextNextStationIconDisplay.alt = `${radioStations[getCircularIndex(displayIndex + 2, radioStations.length)].name} Icon`;
-        }
-
-        // Loads a station into the YouTube player but does not play it.
-        function prepareStation(index) {
-            if (!playerReady || index < 0 || index >= radioStations.length) {
-                console.warn("Player not ready or invalid index for prepareStation:", index);
-                if (!playerReady) showToast("Player initializing, please wait...", 2000);
-                return false;
-            }
-
-            const station = radioStations[index];
-            if (!station || !station.videoId) {
-                showToast(`Station data or Video ID missing for index ${index}`, 3000);
-                return false;
-            }
-
-            // If this station is already cued or playing, no need to reload
-            const currentPlayerVideoId = player.getVideoData ? player.getVideoData().video_id : null;
-            if (actualPlayingStationIndex === index && currentPlayerVideoId === station.videoId && player.getPlayerState() !== YT.PlayerState.ENDED) {
-                 console.log(`${station.name} is already the active track in player.`);
-                 isNewTrackLoading = false; // Not a new track if it's already there
-                 return true;
-            }
-
-            console.log(`Preparing station: ${station.name} (Video ID: ${station.videoId})`);
-            showToast(`Loading: ${station.name}...`, 2000, true);
-            disableControls();
-
-            // `cueVideoById` is better if we don't want immediate play
-            player.cueVideoById(station.videoId);
-            // player.loadVideoById(station.videoId); // This would start loading and potentially play if autoplay was 1
-
-            actualPlayingStationIndex = index; // Update what's intended to be in the player
-            isNewTrackLoading = true; // Flag for random seek on next play
-            // UI updates like station name are handled by switchStationVisuals
-            // enableControls will be called from onPlayerStateChange (e.g. CUED)
-            return true;
-        }
-
-
-        async function togglePlayPause() {
-            if (!playerReady || !ytApiReady) {
-                showToast("Player is not ready. Please wait.", 2500);
-                // Try to initialize if not already
-                if (!ytApiReady && typeof YT === 'undefined') {
-                    // This case should ideally not happen if API script is included correctly
-                    console.error("YT API not loaded at all.");
-                } else if (ytApiReady && !player) {
-                     // This means onYouTubeIframeAPIReady was called but player creation failed or is pending
-                     console.warn("YT API ready, but player instance not available yet.");
-                }
-                return;
-            }
-
-            let targetStationToPlay = currentStationIndex;
-
-            if (targetStationToPlay === -1 && radioStations.length > 0) {
-                targetStationToPlay = 0; // Default to first station
-                switchStationVisuals(targetStationToPlay); // Update visuals for the default
-            }
-
-            if (targetStationToPlay === -1) {
-                showToast("No station selected.", 2000);
-                return;
-            }
-
-            const stationToPlay = radioStations[targetStationToPlay];
-            const currentPlayerVideoId = player.getVideoData ? player.getVideoData().video_id : null;
-
-            // If the visually selected station is not the one in the player, or player is in an ended state
-            if (actualPlayingStationIndex !== targetStationToPlay || currentPlayerVideoId !== stationToPlay.videoId || player.getPlayerState() === YT.PlayerState.ENDED) {
-                console.log("Visual station differs from player's, or player ended. Preparing new station.");
-                if (!prepareStation(targetStationToPlay)) { // This will cue the video
-                    showToast(`Failed to prepare ${stationToPlay.name}. Try again.`, 3000);
-                    enableControls();
-                    return;
-                }
-                // After prepareStation, we need to wait for CUED state, then user can press play again
-                // or we can directly call playVideo() if that's the desired UX.
-                // For now, prepareStation cues it. User presses play again if needed.
-                // Let's try to play it directly after cueing for a smoother experience.
-                // However, playVideo() should ideally be called when the player is in a ready state (like CUED).
-                // The onPlayerStateChange will handle enabling controls and messages.
-                // A short delay might be needed for cueVideoById to take effect before playVideo.
-                // Or, more robustly, play from onPlayerStateChange when CUED.
-                // For simplicity now:
-                setTimeout(() => {
-                    if (player.getPlayerState() !== YT.PlayerState.PLAYING) {
-                         player.playVideo();
-                    }
-                }, 250); // Small delay for cue to process
-                return; // Let state changes handle the rest
-            }
-
-            // If correct station is loaded, toggle play/pause
-            const playerState = player.getPlayerState();
-            if (playerState === YT.PlayerState.PLAYING) {
-                player.pauseVideo();
-            } else {
-                // This includes PAUSED, CUED, UNSTARTED, ENDED
-                player.playVideo();
-            }
-        }
-
-        // Updates visual UI for station change (name, icons)
-        function switchStationVisuals(newIndex) {
-            if (newIndex < 0 || newIndex >= radioStations.length) return;
-
-            currentStationIndex = newIndex; // Update visual selection
-            currentStationNameDisplay.textContent = radioStations[newIndex].name;
-            updateIconCarousel(newIndex);
-            playIcon.classList.remove('hidden'); // Show play icon as new station isn't auto-playing
-            pauseIcon.classList.add('hidden');
-            showToast(`Selected: ${radioStations[newIndex].name}. Press Play.`, 2000);
-        }
-
-
-        // Debounced function to handle station switching logic
-        function debouncedSwitchAndPrepareStation(newIndex) {
-            clearTimeout(stationChangeTimeout);
-            // Update visuals immediately
-            switchStationVisuals(newIndex);
-
-            stationChangeTimeout = setTimeout(() => {
-                if (playerReady) {
-                    // Stop current video before loading new one if it's different
-                    if (actualPlayingStationIndex !== newIndex && player.getPlayerState && (player.getPlayerState() === YT.PlayerState.PLAYING || player.getPlayerState() === YT.PlayerState.BUFFERING)) {
-                        player.stopVideo(); // stopVideo also clears the video
-                        console.log("Stopped current video due to station switch.");
-                    }
-                    // Prepare the new station (cues it, doesn't auto-play)
-                    // The user will press play to start it.
-                    prepareStation(newIndex);
-                } else {
-                    console.warn("Player not ready when trying to prepare station via debounced switch.");
-                    // Visuals are updated, player will pick up currentStationIndex when ready if play is pressed.
-                }
-            }, STATION_CHANGE_DEBOUNCE_DELAY);
-        }
-
-
-        // --- Event Listeners ---
-        playPauseButton.addEventListener('click', togglePlayPause);
-
-        prevButton.addEventListener('click', () => {
-            if (radioStations.length === 0) return;
-            let targetIndex = (currentStationIndex - 1 + radioStations.length) % radioStations.length;
-            if (currentStationIndex === -1) targetIndex = radioStations.length - 1;
-            debouncedSwitchAndPrepareStation(targetIndex);
-        });
-
-        nextButton.addEventListener('click', () => {
-            if (radioStations.length === 0) return;
-            let targetIndex = (currentStationIndex + 1) % radioStations.length;
-            if (currentStationIndex === -1) targetIndex = 0;
-            debouncedSwitchAndPrepareStation(targetIndex);
-        });
-
-        document.addEventListener('keydown', (event) => {
-            if (event.key === 'q' || event.key === 'Q') {
-                if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') return;
-                event.preventDefault();
-                if (radioStations.length === 0) return;
-                let nextIndex = (currentStationIndex + 1) % radioStations.length;
-                if (currentStationIndex === -1) nextIndex = 0;
-                debouncedSwitchAndPrepareStation(nextIndex);
-            }
-        });
-
-        radioContainer.addEventListener('wheel', (event) => {
-            if (radioStations.length === 0) return;
-            // event.preventDefault(); // Allow page scrolling
-            let targetIndex;
-            if (event.deltaY > 0) { // Scroll down
-                targetIndex = (currentStationIndex + 1) % radioStations.length;
-                if (currentStationIndex === -1) targetIndex = 0;
-            } else { // Scroll up
-                targetIndex = (currentStationIndex - 1 + radioStations.length) % radioStations.length;
-                if (currentStationIndex === -1) targetIndex = radioStations.length - 1;
-            }
-            debouncedSwitchAndPrepareStation(targetIndex);
-        });
-
-
-        // --- Initialization on Page Load ---
-        window.onload = () => {
-            // YT API will call onYouTubeIframeAPIReady automatically.
-            // We don't need to explicitly load the first station here,
-            // user interaction (play button) will trigger it.
-            if (radioStations.length > 0) {
-                currentStationIndex = 0; // Visually select the first station
-                switchStationVisuals(currentStationIndex); // Update display for the first station
-                currentStationNameDisplay.textContent = "Press Play"; // Initial prompt
-            } else {
-                currentStationNameDisplay.textContent = "No stations available!";
-                updateIconCarousel(-1);
-                disableControls();
-                prevButton.disabled = true;
-                nextButton.disabled = true;
-            }
-
-            // Preload ALL station icons
-            radioStations.forEach(station => {
-                const img = new Image();
-                img.src = station.icon;
-                img.onerror = () => { console.warn(`Failed to load icon: ${station.icon}`); };
-            });
-
-            // Initial state of controls if player isn't ready yet
-             if (!playerReady) {
-                disableControls();
-             }
-        };
-    </script>
 </body>
 </html>
