@@ -4,27 +4,33 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>School Bus Maintenance Dashboard</title>
 <style>
-    body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 0; }
-    header { background: #2c3e50; color: white; padding: 15px; text-align: center; }
-    .container { width: 90%; margin: auto; margin-top: 20px; }
-    .card { background: white; padding: 15px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    .due-soon { background-color: #fff3cd; }
-    .overdue { background-color: #f8d7da; }
-    h2 { margin-top: 0; }
-    label { display: block; margin-top: 10px; }
-    input, select { padding: 5px; width: 100%; margin-top: 5px; }
-    button { margin-top: 10px; padding: 10px; background: #27ae60; color: white; border: none; border-radius: 5px; cursor: pointer; }
-    button:hover { background: #219150; }
+    body { font-family: 'Segoe UI', sans-serif; background: #eef2f5; margin: 0; padding: 0; }
+    header { background: linear-gradient(90deg, #1d3557, #457b9d); color: white; padding: 20px; text-align: center; box-shadow: 0 3px 6px rgba(0,0,0,0.1); }
+    .container { width: 90%; max-width: 1000px; margin: auto; margin-top: 20px; }
+    .card { background: white; padding: 15px; margin-bottom: 15px; border-radius: 10px; box-shadow: 0 3px 8px rgba(0,0,0,0.08); cursor: pointer; transition: transform 0.2s; }
+    .card:hover { transform: scale(1.01); }
+    .due-soon { border-left: 6px solid #f6c23e; }
+    .overdue { border-left: 6px solid #e74a3b; }
+    h2 { margin-top: 0; color: #1d3557; }
+    label { display: block; margin-top: 10px; color: #333; font-weight: bold; }
+    input, select { padding: 8px; width: 100%; margin-top: 5px; border-radius: 6px; border: 1px solid #ccc; font-size: 14px; }
+    button { margin-top: 10px; padding: 10px; background: #1d3557; color: white; border: none; border-radius: 6px; cursor: pointer; transition: background 0.2s; }
+    button:hover { background: #16324f; }
+    .task-list { display: none; margin-top: 12px; padding-left: 10px; border-top: 1px solid #ddd; padding-top: 10px; }
+    .task-list div { padding: 5px 0; border-bottom: 1px solid #f1f1f1; }
+    .task-list div:last-child { border-bottom: none; }
+    .task-button { background: #27ae60; border-radius: 5px; padding: 4px 8px; margin-left: 8px; font-size: 12px; }
+    .task-button:hover { background: #1e8c4a; }
 </style>
 </head>
 <body>
 <header>
-    <h1>School Bus Maintenance Dashboard</h1>
+    <h1>Maintenance Dashboard</h1>
 </header>
 <div class="container">
-    <h2>Add Vehicle</h2>
+    <h2>Add Vehicle Task</h2>
     <div class="card">
-        <label>Vehicle Name/Number:</label>
+        <label>Vehicle Name:</label>
         <input type="text" id="vehicleName">
         <label>Task Type:</label>
         <select id="taskType">
@@ -39,52 +45,58 @@
         <input type="date" id="lastDate">
         <label>Renewal Interval (months):</label>
         <input type="number" id="interval" min="1" value="12">
-        <button onclick="addVehicle()">Add Vehicle Task</button>
+        <button onclick="addTask()">Add Task</button>
     </div>
     <h2>Upcoming Tasks</h2>
-    <div id="taskList"></div>
+    <div id="dashboard"></div>
 </div>
 <script>
-let tasks = JSON.parse(localStorage.getItem('tasks')) || [];function addVehicle() { let vehicle = document.getElementById('vehicleName').value.trim(); let taskType = document.getElementById('taskType').value; let lastDate = new Date(document.getElementById('lastDate').value); let interval = parseInt(document.getElementById('interval').value);
+let tasks = JSON.parse(localStorage.getItem('tasks')) || [];function addTask() { let vehicle = document.getElementById('vehicleName').value.trim(); let taskType = document.getElementById('taskType').value; let lastDate = new Date(document.getElementById('lastDate').value); let interval = parseInt(document.getElementById('interval').value); if (!vehicle || isNaN(lastDate.getTime())) { alert('Please fill all fields correctly'); return; } let nextDate = new Date(lastDate); nextDate.setMonth(nextDate.getMonth() + interval); tasks.push({ vehicle, taskType, lastDate: lastDate.toISOString(), interval, nextDate: nextDate.toISOString() }); localStorage.setItem('tasks', JSON.stringify(tasks)); renderDashboard(); }
 
-if (!vehicle || isNaN(lastDate.getTime())) {
-    alert('Please fill all fields correctly');
-    return;
-}
+function markCompleted(vehicle, taskType) { let task = tasks.find(t => t.vehicle === vehicle && t.taskType === taskType); if (task) { let newLastDate = new Date(task.nextDate); let newNextDate = new Date(newLastDate); newNextDate.setMonth(newNextDate.getMonth() + task.interval); task.lastDate = newLastDate.toISOString(); task.nextDate = newNextDate.toISOString(); localStorage.setItem('tasks', JSON.stringify(tasks)); renderDashboard(); } }
 
-let nextDate = new Date(lastDate);
-nextDate.setMonth(nextDate.getMonth() + interval);
+function toggleTaskList(id) { let el = document.getElementById(id); el.style.display = el.style.display === 'block' ? 'none' : 'block'; }
 
-tasks.push({ vehicle, taskType, lastDate: lastDate.toISOString(), interval, nextDate: nextDate.toISOString() });
-localStorage.setItem('tasks', JSON.stringify(tasks));
-renderTasks();
+function renderDashboard() { let dashboard = document.getElementById('dashboard'); dashboard.innerHTML = ''; let today = new Date();
 
-}
+let grouped = {};
+tasks.forEach(t => {
+    if (!grouped[t.vehicle]) grouped[t.vehicle] = [];
+    grouped[t.vehicle].push(t);
+});
 
-function markCompleted(index) { let task = tasks[index]; let newLastDate = new Date(task.nextDate); let newNextDate = new Date(newLastDate); newNextDate.setMonth(newNextDate.getMonth() + task.interval); tasks[index].lastDate = newLastDate.toISOString(); tasks[index].nextDate = newNextDate.toISOString(); localStorage.setItem('tasks', JSON.stringify(tasks)); renderTasks(); }
+let sortedVehicles = Object.keys(grouped).sort((a, b) => {
+    let nextA = Math.min(...grouped[a].map(t => new Date(t.nextDate).getTime()));
+    let nextB = Math.min(...grouped[b].map(t => new Date(t.nextDate).getTime()));
+    return nextA - nextB;
+});
 
-function renderTasks() { let list = document.getElementById('taskList'); list.innerHTML = ''; let today = new Date();
-
-tasks.sort((a,b) => new Date(a.nextDate) - new Date(b.nextDate));
-
-tasks.forEach((t, i) => {
-    let nextDate = new Date(t.nextDate);
-    let diffDays = Math.floor((nextDate - today) / (1000*60*60*24));
+sortedVehicles.forEach((vehicle, idx) => {
+    let vehicleTasks = grouped[vehicle].sort((a, b) => new Date(a.nextDate) - new Date(b.nextDate));
+    let nearest = vehicleTasks[0];
+    let diffDays = Math.floor((new Date(nearest.nextDate) - today) / (1000*60*60*24));
     
     let card = document.createElement('div');
     card.className = 'card';
     if (diffDays <= 7 && diffDays >= 0) card.classList.add('due-soon');
     if (diffDays < 0) card.classList.add('overdue');
-    
-    card.innerHTML = `<strong>${t.vehicle}</strong> - ${t.taskType}<br>
-    Next Due: ${nextDate.toDateString()} (${diffDays} days left)
-    <br><button onclick="markCompleted(${i})">Mark Completed</button>`;
-    list.appendChild(card);
+    card.onclick = () => toggleTaskList('tasks_' + idx);
+
+    card.innerHTML = `<strong style="font-size:18px;">${vehicle}</strong><br>
+        <span style="color:#555;">Nearest Task:</span> <strong>${nearest.taskType}</strong> - ${new Date(nearest.nextDate).toDateString()} <span style="color:#888;">(${diffDays} days left)</span>
+        <div class="task-list" id="tasks_${idx}">
+            ${vehicleTasks.map(t => {
+                let d = Math.floor((new Date(t.nextDate) - today) / (1000*60*60*24));
+                return `<div><strong>${t.taskType}</strong> - ${new Date(t.nextDate).toDateString()} <span style='color:#777'>(${d} days left)</span>
+                    <button class='task-button' onclick=\"event.stopPropagation();markCompleted('${t.vehicle}','${t.taskType}')\">Mark Completed</button></div>`;
+            }).join('')}
+        </div>`;
+    dashboard.appendChild(card);
 });
 
 }
 
-renderTasks(); </script>
+renderDashboard(); </script>
 
 </body>
 </html>
