@@ -24,15 +24,47 @@
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js" defer></script>
 
     <style>
+        /* CSS Variables for Dark Mode */
+        :root {
+            --bg-primary: #f9fafb;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f3f4f6;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --text-tertiary: #9ca3af;
+            --border-color: #e5e7eb;
+            --accent-color: #3b82f6;
+            --shadow: rgba(0, 0, 0, 0.05);
+            --shadow-md: rgba(0, 0, 0, 0.1);
+            --input-bg: #f9fafb;
+            --hover-bg: rgba(0, 0, 0, 0.05);
+        }
+        
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-tertiary: #94a3b8;
+            --border-color: #334155;
+            --accent-color: #3b82f6;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --shadow-md: rgba(0, 0, 0, 0.5);
+            --input-bg: #1e293b;
+            --hover-bg: rgba(255, 255, 255, 0.05);
+        }
+        
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f9fafb;
-            color: #111827;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
             -webkit-tap-highlight-color: transparent;
             overflow-x: hidden;
             scroll-behavior: smooth;
             touch-action: pan-y;
             will-change: scroll-position;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
         
         /* Performance optimizations */
@@ -806,12 +838,12 @@
 <body class="min-h-screen flex flex-col">
 
     <!-- Loading Overlay -->
-    <div id="loading-overlay" class="fixed inset-0 bg-white flex flex-col items-center justify-center z-[1000] transition-opacity duration-500">
+    <div id="loading-overlay" class="fixed inset-0 flex flex-col items-center justify-center z-[1000] transition-opacity duration-500" style="background-color: var(--bg-secondary);">
         <div class="relative w-16 h-16">
-            <div class="absolute inset-0 border-4 border-gray-100 rounded-full"></div>
-            <div class="absolute inset-0 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
+            <div class="absolute inset-0 border-4 rounded-full" style="border-color: var(--border-color);"></div>
+            <div class="absolute inset-0 border-4 border-t-transparent rounded-full animate-spin" style="border-color: var(--accent-color);"></div>
         </div>
-        <p class="mt-6 font-black tracking-tighter text-lg">QUICKBILL PRO</p>
+        <p class="mt-6 font-black tracking-tighter text-lg" style="color: var(--text-primary);">QUICKBILL PRO</p>
     </div>
 
     <!-- Scanner UI -->
@@ -1141,23 +1173,37 @@
         <div id="page-settings" class="page-content space-y-8">
             <h2 class="text-3xl font-black">Settings & Cloud</h2>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div class="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm space-y-8">
+                <!-- Dark Mode Toggle Card -->
+                <div class="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm space-y-8" style="background-color: var(--bg-secondary); border-color: var(--border-color);">
+                    <h3 class="text-xl font-black">Appearance</h3>
+                    <div class="flex items-center justify-between p-6 bg-gray-50 rounded-2xl" style="background-color: var(--bg-tertiary);">
+                        <div>
+                            <p class="font-bold text-lg">Dark Mode</p>
+                            <p class="text-sm" style="color: var(--text-secondary);">Toggle between light and dark theme</p>
+                        </div>
+                        <button onclick="toggleDarkMode()" id="dark-mode-toggle" class="relative w-16 h-8 rounded-full transition-colors duration-300" style="background-color: #cbd5e1;">
+                            <div id="dark-mode-slider" class="absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow-md transition-transform duration-300"></div>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm space-y-8" style="background-color: var(--bg-secondary); border-color: var(--border-color);">
                     <h3 class="text-xl font-black">Company Identity</h3>
                     <form id="settings-form" class="space-y-4">
-                        <input type="text" id="companyName" placeholder="Company Name" class="w-full p-4 bg-gray-50 rounded-2xl outline-none focus:ring-2 focus:ring-black">
-                        <input type="text" id="address" placeholder="Address" class="w-full p-4 bg-gray-50 rounded-2xl outline-none focus:ring-2 focus:ring-black">
-                        <input type="tel" id="phone" placeholder="Phone Number" class="w-full p-4 bg-gray-50 rounded-2xl outline-none focus:ring-2 focus:ring-black">
-                        <input type="email" id="email" placeholder="Email Address" class="w-full p-4 bg-gray-50 rounded-2xl outline-none focus:ring-2 focus:ring-black">
-                        <input type="text" id="gstNumber" placeholder="Tax ID / GSTIN" class="w-full p-4 bg-gray-50 rounded-2xl outline-none focus:ring-2 focus:ring-black">
-                        <textarea id="defaultBillNotes" placeholder="Default Bill Notes" class="w-full p-4 bg-gray-50 rounded-2xl outline-none min-h-[100px] focus:ring-2 focus:ring-black"></textarea>
+                        <input type="text" id="companyName" placeholder="Company Name" class="w-full p-4 bg-gray-50 rounded-2xl outline-none focus:ring-2 focus:ring-black" style="background-color: var(--input-bg); color: var(--text-primary);">
+                        <input type="text" id="address" placeholder="Address" class="w-full p-4 bg-gray-50 rounded-2xl outline-none focus:ring-2 focus:ring-black" style="background-color: var(--input-bg); color: var(--text-primary);">
+                        <input type="tel" id="phone" placeholder="Phone Number" class="w-full p-4 bg-gray-50 rounded-2xl outline-none focus:ring-2 focus:ring-black" style="background-color: var(--input-bg); color: var(--text-primary);">
+                        <input type="email" id="email" placeholder="Email Address" class="w-full p-4 bg-gray-50 rounded-2xl outline-none focus:ring-2 focus:ring-black" style="background-color: var(--input-bg); color: var(--text-primary);">
+                        <input type="text" id="gstNumber" placeholder="Tax ID / GSTIN" class="w-full p-4 bg-gray-50 rounded-2xl outline-none focus:ring-2 focus:ring-black" style="background-color: var(--input-bg); color: var(--text-primary);">
+                        <textarea id="defaultBillNotes" placeholder="Default Bill Notes" class="w-full p-4 bg-gray-50 rounded-2xl outline-none min-h-[100px] focus:ring-2 focus:ring-black" style="background-color: var(--input-bg); color: var(--text-primary);"></textarea>
                         <button type="submit" class="w-full bg-black text-white py-5 rounded-2xl font-black">Update Identity</button>
                     </form>
                 </div>
-                <div class="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm space-y-8">
+                <div class="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm space-y-8" style="background-color: var(--bg-secondary); border-color: var(--border-color);">
                     <h3 class="text-xl font-black">Data Utility</h3>
                     <div class="space-y-4">
-                        <button onclick="exportData()" class="w-full bg-gray-100 py-5 rounded-2xl font-black text-sm hover:bg-gray-200 transition-colors">Download Backup (JSON)</button>
-                        <label class="block w-full text-center bg-gray-100 py-5 rounded-2xl font-black text-sm cursor-pointer hover:bg-gray-200 transition-colors">
+                        <button onclick="exportData()" class="w-full bg-gray-100 py-5 rounded-2xl font-black text-sm hover:bg-gray-200 transition-colors" style="background-color: var(--bg-tertiary);">Download Backup (JSON)</button>
+                        <label class="block w-full text-center bg-gray-100 py-5 rounded-2xl font-black text-sm cursor-pointer hover:bg-gray-200 transition-colors" style="background-color: var(--bg-tertiary);">
                             Import Recovery File
                             <input type="file" id="import-file-input" class="hidden" onchange="importData(event)">
                         </label>
@@ -1192,6 +1238,37 @@
         let currentPage = 'dashboard';
         let messageTimeout = null;
         let resolveConfirmationPromise;
+        let darkMode = false;
+
+        // --- Dark Mode Functions ---
+        function toggleDarkMode() {
+            darkMode = !darkMode;
+            applyDarkMode();
+            localStorage.setItem('darkMode', darkMode);
+            showToast(darkMode ? 'Dark mode enabled 🌙' : 'Light mode enabled ☀️');
+        }
+        
+        function applyDarkMode() {
+            const html = document.documentElement;
+            const toggle = document.getElementById('dark-mode-toggle');
+            const slider = document.getElementById('dark-mode-slider');
+            
+            if (darkMode) {
+                html.setAttribute('data-theme', 'dark');
+                if (toggle) toggle.style.backgroundColor = '#3b82f6';
+                if (slider) slider.style.transform = 'translateX(32px)';
+            } else {
+                html.removeAttribute('data-theme');
+                if (toggle) toggle.style.backgroundColor = '#cbd5e1';
+                if (slider) slider.style.transform = 'translateX(0)';
+            }
+        }
+        
+        function loadDarkMode() {
+            const saved = localStorage.getItem('darkMode');
+            darkMode = saved === 'true';
+            applyDarkMode();
+        }
 
         // --- Helper Functions (Optimized) ---
         let toastQueue = [];
@@ -3396,55 +3473,64 @@ ${itemsList}`;
 
         // --- Initial Load ---
         window.addEventListener('load', () => {
-            // Initialize with a default user ID (for demo purposes)
-            // In a real app, you would implement proper authentication
-            userId = 'demo-user-' + Math.random().toString(36).substr(2, 9);
-            document.getElementById('mobile-user-id').textContent = `User ID: ${userId}`;
-            isAuthReady = true;
+            try {
+                // Load dark mode preference first
+                loadDarkMode();
+                
+                // Initialize with a default user ID (for demo purposes)
+                // In a real app, you would implement proper authentication
+                userId = 'demo-user-' + Math.random().toString(36).substr(2, 9);
+                document.getElementById('mobile-user-id').textContent = `User ID: ${userId}`;
+                isAuthReady = true;
 
-            // Load data from localStorage
-            companyDetails = loadDataFromLocalStorage('companyDetails', companyDetails);
+                // Load data from localStorage
+                companyDetails = loadDataFromLocalStorage('companyDetails', companyDetails);
 
-            const storedOrders = loadDataFromLocalStorage('orders', []);
-            const processedOrders = storedOrders.map(order => ({
-                ...order,
-                orderDate: order.orderDate ? new Date(order.orderDate) : new Date()
-            }));
+                const storedOrders = loadDataFromLocalStorage('orders', []);
+                const processedOrders = storedOrders.map(order => ({
+                    ...order,
+                    orderDate: order.orderDate ? new Date(order.orderDate) : new Date()
+                }));
 
-            orders = processedOrders.filter(order => !order.isDelivered);
-            completedOrders = processedOrders.filter(order => order.isDelivered);
+                orders = processedOrders.filter(order => !order.isDelivered);
+                completedOrders = processedOrders.filter(order => order.isDelivered);
 
-            orders.sort((a, b) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime());
-            completedOrders.sort((a, b) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime());
+                orders.sort((a, b) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime());
+                completedOrders.sort((a, b) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime());
 
-            const storedNotes = loadDataFromLocalStorage('notes', []);
-            notes = storedNotes.map(note => ({
-                ...note,
-                createdAt: note.createdAt ? new Date(note.createdAt) : new Date()
-            }));
-            notes.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+                const storedNotes = loadDataFromLocalStorage('notes', []);
+                notes = storedNotes.map(note => ({
+                    ...note,
+                    createdAt: note.createdAt ? new Date(note.createdAt) : new Date()
+                }));
+                notes.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-            const storedStock = loadDataFromLocalStorage('stock', []);
-            stock = storedStock.map(item => ({
-                ...item,
-                price: parseFloat(item.price),
-                quantity: item.quantity !== undefined ? parseInt(item.quantity) : 0,
-                barcode: item.barcode || `${Date.now()}${Math.floor(Math.random() * 10000)}` // Assign barcode to old items
-            }));
-            stock.sort((a, b) => a.name.localeCompare(b.name));
-            
-            // Save stock with new barcodes
-            saveDataToLocalStorage('stock', stock);
-
-            // Hide loading overlay (Optimized)
-            setTimeout(() => {
-                const loadingOverlay = document.getElementById('loading-overlay');
-                loadingOverlay.style.opacity = '0';
+                const storedStock = loadDataFromLocalStorage('stock', []);
+                stock = storedStock.map(item => ({
+                    ...item,
+                    price: parseFloat(item.price),
+                    quantity: item.quantity !== undefined ? parseInt(item.quantity) : 0,
+                    barcode: item.barcode || `${Date.now()}${Math.floor(Math.random() * 10000)}` // Assign barcode to old items
+                }));
+                stock.sort((a, b) => a.name.localeCompare(b.name));
+                
+                // Save stock with new barcodes
+                saveDataToLocalStorage('stock', stock);
+            } catch (error) {
+                console.error('Initialization error:', error);
+            } finally {
+                // Always hide loading overlay even if there's an error
                 setTimeout(() => {
-                    loadingOverlay.classList.add('hidden');
-                    renderPage('dashboard');
-                }, 250);
-            }, 600);
+                    const loadingOverlay = document.getElementById('loading-overlay');
+                    if (loadingOverlay) {
+                        loadingOverlay.style.opacity = '0';
+                        setTimeout(() => {
+                            loadingOverlay.classList.add('hidden');
+                            renderPage('dashboard');
+                        }, 250);
+                    }
+                }, 600);
+            }
         });
 
         // Navigation event listeners
