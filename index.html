@@ -21,33 +21,43 @@
             color: #111827;
             -webkit-tap-highlight-color: transparent;
             overflow-x: hidden;
+            scroll-behavior: smooth;
         }
 
         /* --- UI Animations --- */
         .page-content {
             display: none;
-            animation: pageEnter 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            animation: pageEnter 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         @keyframes pageEnter {
-            from { opacity: 0; transform: translateY(15px); }
+            from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
         /* Fixed Centered Notification */
         @keyframes fadeInDown {
-            from { opacity: 0; transform: translate(-50%, -20px); }
+            from { opacity: 0; transform: translate(-50%, -15px); }
             to { opacity: 1; transform: translate(-50%, 0); }
         }
 
         .animate-fade-in-down {
-            animation: fadeInDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation: fadeInDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
         .nav-button.active {
             background-color: #000;
             color: #fff;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .nav-button:not(.active):hover {
+            background-color: rgba(0,0,0,0.05);
+        }
+        
+        /* Button press feedback */
+        button:not(.mobile-menu-close):not(.hamburger-button):active {
+            transform: scale(0.98);
         }
 
         /* --- Scanner Styling --- */
@@ -94,14 +104,24 @@
         }
 
         /* --- Chart Visuals --- */
-        .chart-bar { transition: height 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
-        .line-path { fill: none; stroke: #3b82f6; stroke-width: 3; transition: all 0.5s; }
-        .area-path { fill: rgba(59, 130, 246, 0.08); transition: all 0.5s; }
+        .chart-bar { transition: height 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .line-path { fill: none; stroke: #3b82f6; stroke-width: 3; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        .area-path { fill: rgba(59, 130, 246, 0.08); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
 
         /* --- Print Utilities --- */
         @media print {
             .no-print { display: none !important; }
             body { background: white; }
+        }
+        
+        /* Loading overlay */
+        #loading-overlay {
+            transition: opacity 0.3s ease;
+        }
+        
+        #loading-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
         }
         
         #bill-to-print {
@@ -449,7 +469,7 @@
             display: flex;
             flex-direction: column;
             transform: translateX(-100%);
-            transition: transform 0.3s ease;
+            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         }
         
         .mobile-menu.open {
@@ -494,11 +514,17 @@
             color: white;
             text-decoration: none;
             border-radius: 0.5rem;
-            transition: background 0.2s;
+            transition: background 0.15s ease;
+            cursor: pointer;
         }
         
         .mobile-nav-item:hover, .mobile-nav-item.active {
             background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .mobile-nav-item:active {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(0.99);
         }
         
         .mobile-nav-item i {
@@ -1043,14 +1069,21 @@
             item.addEventListener('click', (e) => {
                 e.preventDefault();
                 const page = item.dataset.page;
-                renderPage(page);
+                
+                // Close menu first for smoother UX
                 mobileMenu.classList.remove('open');
                 document.body.classList.remove('menu-open');
                 
+                // Update active state
                 mobileNavItems.forEach(navItem => {
                     navItem.classList.remove('active');
                 });
                 item.classList.add('active');
+                
+                // Render page after menu closes
+                setTimeout(() => {
+                    renderPage(page);
+                }, 100);
             });
         });
 
@@ -1517,6 +1550,13 @@
                 total: 0
             });
             updateProductsTable();
+            
+            // Auto-focus the new row's product input
+            setTimeout(() => {
+                const newIndex = currentItems.length - 1;
+                const newInput = document.querySelector(`input[data-index="${newIndex}"][data-field="product"]`);
+                if (newInput) newInput.focus();
+            }, 50);
         }
 
         function addItemRowWithData(name, price) {
@@ -1563,6 +1603,7 @@
                     calculateAndDisplayGrandTotal();
                 };
 
+                // Auto-fill price from stock
                 if (input.dataset.field === 'product') {
                     input.addEventListener('change', (e) => {
                         const productName = e.target.value.trim();
@@ -1572,10 +1613,41 @@
                         if (stockItem) {
                             currentItems[index].pricePerUnit = parseFloat(stockItem.price);
                             currentItems[index].total = (isNaN(currentItems[index].quantity) || currentItems[index].quantity === '' ? 0 : currentItems[index].quantity) * currentItems[index].pricePerUnit;
+                            updateProductsTable();
                             calculateAndDisplayGrandTotal();
                         }
                     });
                 }
+
+                // Enter key navigation
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const index = parseInt(e.target.dataset.index);
+                        const field = e.target.dataset.field;
+                        
+                        let nextInput = null;
+                        if (field === 'product') {
+                            nextInput = container.querySelector(`input[data-index="${index}"][data-field="quantity"]`);
+                        } else if (field === 'quantity') {
+                            nextInput = container.querySelector(`input[data-index="${index}"][data-field="pricePerUnit"]`);
+                        } else if (field === 'pricePerUnit') {
+                            if (index === currentItems.length - 1) {
+                                addItemRow();
+                                setTimeout(() => {
+                                    const newInput = container.querySelector(`input[data-index="${index + 1}"][data-field="product"]`);
+                                    if (newInput) newInput.focus();
+                                }, 50);
+                            } else {
+                                nextInput = container.querySelector(`input[data-index="${index + 1}"][data-field="product"]`);
+                            }
+                        }
+                        
+                        if (nextInput) {
+                            nextInput.focus();
+                        }
+                    }
+                });
             });
 
             container.querySelectorAll('button[data-action="remove"]').forEach(button => {
@@ -2863,12 +2935,13 @@
 
             // Hide loading overlay
             setTimeout(() => {
-                document.getElementById('loading-overlay').style.opacity = '0';
+                const loadingOverlay = document.getElementById('loading-overlay');
+                loadingOverlay.style.opacity = '0';
                 setTimeout(() => {
-                    document.getElementById('loading-overlay').style.display = 'none';
+                    loadingOverlay.classList.add('hidden');
                     renderPage('dashboard');
-                }, 500);
-            }, 1000);
+                }, 300);
+            }, 800);
         });
 
         // Navigation event listeners
