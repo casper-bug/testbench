@@ -13,6 +13,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2/dist/quagga.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 
     <style>
         body {
@@ -441,6 +442,42 @@
             margin-bottom: 1rem;
         }
 
+        /* Autocomplete styles */
+        .autocomplete-items {
+            position: absolute;
+            border: 1px solid #d1d5db;
+            border-top: none;
+            z-index: 99;
+            top: 100%;
+            left: 0;
+            right: 0;
+            max-height: 200px;
+            overflow-y: auto;
+            background-color: white;
+            border-radius: 0 0 1rem 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .autocomplete-items div {
+            padding: 10px;
+            cursor: pointer;
+            background-color: white;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        
+        .autocomplete-items div:hover {
+            background-color: #f3f4f6;
+        }
+        
+        .autocomplete-active {
+            background-color: #3b82f6 !important;
+            color: white !important;
+        }
+        
+        .autocomplete-container {
+            position: relative;
+        }
+
         /* Hamburger Menu Styles */
         .hamburger-menu {
             position: relative;
@@ -817,6 +854,7 @@
                                 <th class="p-8 text-[10px] font-black uppercase text-gray-400">Product</th>
                                 <th class="p-8 text-[10px] font-black uppercase text-gray-400">Price</th>
                                 <th class="p-8 text-[10px] font-black uppercase text-gray-400">Qty</th>
+                                <th class="p-8 text-[10px] font-black uppercase text-gray-400">Barcode</th>
                                 <th class="p-8 text-[10px] font-black uppercase text-gray-400 text-right">Actions</th>
                             </tr>
                         </thead>
@@ -1024,6 +1062,58 @@
         function stopScanner() {
             Quagga.stop();
             document.getElementById('scanner-overlay').style.display = 'none';
+        }
+
+        // --- Autocomplete Functions ---
+        function showAutocomplete(input, value, index) {
+            closeAllLists();
+            if (!value) return;
+            
+            const autocompleteList = document.createElement('div');
+            autocompleteList.setAttribute('id', `autocomplete-list-${index}`);
+            autocompleteList.className = 'autocomplete-items';
+            
+            const matches = stock.filter(item => 
+                item.name.toLowerCase().includes(value.toLowerCase())
+            );
+            
+            if (matches.length === 0) return;
+            
+            matches.forEach(item => {
+                const suggestionDiv = document.createElement('div');
+                const matchStart = item.name.toLowerCase().indexOf(value.toLowerCase());
+                const matchEnd = matchStart + value.length;
+                
+                suggestionDiv.innerHTML = 
+                    item.name.substr(0, matchStart) +
+                    `<strong>${item.name.substr(matchStart, value.length)}</strong>` +
+                    item.name.substr(matchEnd) +
+                    ` <span style="color: #6b7280; font-size: 0.875rem;">(₹${item.price.toFixed(2)})</span>`;
+                
+                suggestionDiv.addEventListener('click', () => {
+                    input.value = item.name;
+                    currentItems[index].product = item.name;
+                    currentItems[index].pricePerUnit = parseFloat(item.price);
+                    currentItems[index].total = (isNaN(currentItems[index].quantity) || currentItems[index].quantity === '' ? 0 : currentItems[index].quantity) * currentItems[index].pricePerUnit;
+                    updateProductsTable();
+                    calculateAndDisplayGrandTotal();
+                    closeAllLists();
+                    
+                    // Focus on quantity field
+                    const container = document.getElementById('bill-items-container');
+                    const quantityInput = container.querySelector(`input[data-index="${index}"][data-field="quantity"]`);
+                    if (quantityInput) quantityInput.focus();
+                });
+                
+                autocompleteList.appendChild(suggestionDiv);
+            });
+            
+            input.parentNode.appendChild(autocompleteList);
+        }
+        
+        function closeAllLists() {
+            const lists = document.getElementsByClassName('autocomplete-items');
+            Array.from(lists).forEach(list => list.remove());
         }
 
         // --- Navigation ---
@@ -1515,9 +1605,11 @@
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td class="py-3 px-4">
-                        <input type="text" data-field="product" data-index="${index}" value="${item.product}"
-                            class="block w-full px-4 py-3 bg-gray-50 rounded-2xl border-none outline-none focus:ring-2 focus:ring-black transition-all"
-                            placeholder="Product Name" required />
+                        <div class="autocomplete-container">
+                            <input type="text" data-field="product" data-index="${index}" value="${item.product}"
+                                class="block w-full px-4 py-3 bg-gray-50 rounded-2xl border-none outline-none focus:ring-2 focus:ring-black transition-all"
+                                placeholder="Product Name" required />
+                        </div>
                     </td>
                     <td class="py-3 px-4">
                         <input type="number" data-field="quantity" data-index="${index}" value="${item.quantity || ''}" step="1" min="1"
@@ -1591,6 +1683,8 @@
 
                     if (field === 'product') {
                         currentItems[index][field] = value;
+                        // Show autocomplete suggestions
+                        showAutocomplete(e.target, value, index);
                     } else if (field === 'quantity' || field === 'pricePerUnit') {
                         currentItems[index][field] = value === '' ? '' : parseFloat(value);
                     }
@@ -1616,6 +1710,11 @@
                             updateProductsTable();
                             calculateAndDisplayGrandTotal();
                         }
+                    });
+                    
+                    // Close autocomplete when clicking outside
+                    input.addEventListener('blur', () => {
+                        setTimeout(() => closeAllLists(), 200);
                     });
                 }
 
@@ -1827,6 +1926,11 @@
                                 <span class="px-4 py-2 rounded-xl text-sm font-bold ${isLowStock ? 'bg-red-50 text-red-500' : 'bg-green-50 text-green-600'}">
                                     ${item.quantity} units
                                 </span>
+                            </td>
+                            <td class="p-8">
+                                <button onclick="generateBarcode('${item.id}')" class="bg-indigo-600 text-white px-4 py-2 rounded-2xl text-sm font-black hover:bg-indigo-700 transition-colors shadow-sm flex items-center justify-center gap-2">
+                                    <i class="material-icons text-lg">qr_code</i> Generate
+                                </button>
                             </td>
                             <td class="p-8 text-right">
                                 <div class="flex gap-2 justify-end">
@@ -2186,6 +2290,9 @@
                     <button onclick="handlePrintBill('${order.id}', 'photo')" class="bg-black text-white px-6 py-3 rounded-2xl text-sm font-black hover:bg-gray-800 transition-colors shadow-sm flex items-center justify-center gap-2">
                         <i class="material-icons">image</i> Export Photo
                     </button>
+                    <button onclick="shareQR('${order.id}')" class="bg-blue-600 text-white px-6 py-3 rounded-2xl text-sm font-black hover:bg-blue-700 transition-colors shadow-sm flex items-center justify-center gap-2">
+                        <i class="material-icons">qr_code</i> Share QR
+                    </button>
                     <button onclick="handleToggleDelivered('${order.id}', true)" class="bg-gray-600 text-white px-6 py-3 rounded-2xl text-sm font-black hover:bg-gray-700 transition-colors shadow-sm flex items-center justify-center gap-2">
                         <i class="material-icons">unarchive</i> Move to Active
                     </button>
@@ -2248,6 +2355,9 @@
                     actionsHtml = `
                         <button onclick="handlePrintBill('${order.id}', 'photo')" class="bg-black text-white px-6 py-3 rounded-2xl text-sm font-black hover:bg-gray-800 transition-colors shadow-sm flex items-center justify-center gap-2">
                             <i class="material-icons">image</i> Photo
+                        </button>
+                        <button onclick="shareQR('${order.id}')" class="bg-blue-600 text-white px-6 py-3 rounded-2xl text-sm font-black hover:bg-blue-700 transition-colors shadow-sm flex items-center justify-center gap-2">
+                            <i class="material-icons">qr_code</i> Share QR
                         </button>
                         <button onclick="handleEditOrder('${order.id}')" class="bg-gray-600 text-white px-6 py-3 rounded-2xl text-sm font-black hover:bg-gray-700 transition-colors shadow-sm flex items-center justify-center gap-2">
                             <i class="material-icons">edit</i> Edit
@@ -2721,14 +2831,75 @@
                 return;
             }
             
-            const data = `Receipt: ${order.id}\nCustomer: ${order.buyerName}\nTotal: ₹${order.grandTotal.toFixed(2)}\nDate: ${new Date(order.orderDate).toLocaleDateString()}`;
+            // Generate shareable bill link or data
+            const billData = {
+                id: order.id,
+                buyer: order.buyerName,
+                total: order.grandTotal,
+                date: new Date(order.orderDate).toLocaleDateString(),
+                items: order.items.map(item => `${item.product} x${item.quantity}`).join(', ')
+            };
+            
+            const itemsList = order.items.map(item => `- ${item.product} x${item.quantity} @ ₹${item.pricePerUnit.toFixed(2)} = ₹${item.total.toFixed(2)}`).join('\n');
+            const shareText = `Bill #${order.id}
+Customer: ${order.buyerName}
+Total: ₹${order.grandTotal.toFixed(2)}
+Date: ${new Date(order.orderDate).toLocaleDateString()}
+
+Items:
+${itemsList}`;
             
             document.getElementById('qrcode-canvas').innerHTML = '';
             new QRCode(document.getElementById("qrcode-canvas"), {
-                text: data, width: 220, height: 220, colorDark: "#000", colorLight: "#fff", correctLevel: QRCode.CorrectLevel.H
+                text: shareText, 
+                width: 220, 
+                height: 220, 
+                colorDark: "#000", 
+                colorLight: "#fff", 
+                correctLevel: QRCode.CorrectLevel.H
             });
             document.getElementById('qr-modal').classList.remove('hidden');
         }
+        
+        // --- Barcode Generation ---
+        window.generateBarcode = (stockId) => {
+            const item = stock.find(s => s.id === stockId);
+            if (!item) {
+                showToast("Stock item not found.");
+                return;
+            }
+            
+            // Create a canvas for barcode
+            const canvas = document.createElement('canvas');
+            
+            try {
+                // Generate barcode using the product name as the barcode value
+                JsBarcode(canvas, item.name, {
+                    format: "CODE128",
+                    width: 2,
+                    height: 100,
+                    displayValue: true,
+                    fontSize: 16,
+                    margin: 10
+                });
+                
+                // Convert canvas to image and download
+                canvas.toBlob((blob) => {
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `barcode_${item.name.replace(/\s+/g, '_')}.png`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+                    showToast(`Barcode for "${item.name}" downloaded!`);
+                });
+            } catch (error) {
+                console.error('Barcode generation error:', error);
+                showToast("Failed to generate barcode. Please try again.");
+            }
+        };
 
         // --- Settings Page Logic ---
         function renderSettings() {
