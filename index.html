@@ -4,16 +4,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#3b82f6">
+    <meta name="description" content="QuickBill Pro - Fast, Modern Order Management System">
     <title>QuickBill Pro - Enterprise Order Management</title>
+    
+    <!-- Preconnect to external resources for faster loading -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-    <!-- Essential Libraries -->
-    <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2/dist/quagga.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <!-- Essential Libraries - Loaded asynchronously when needed -->
+    <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2/dist/quagga.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js" defer></script>
 
     <style>
         body {
@@ -23,27 +31,59 @@
             -webkit-tap-highlight-color: transparent;
             overflow-x: hidden;
             scroll-behavior: smooth;
+            touch-action: pan-y;
+            will-change: scroll-position;
+        }
+        
+        /* Performance optimizations */
+        * {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        /* Lazy loading optimization */
+        img {
+            content-visibility: auto;
+        }
+        
+        /* GPU acceleration for animations */
+        .page-content,
+        .mobile-menu,
+        .mobile-menu-overlay,
+        .nav-button,
+        button,
+        .mobile-nav-item {
+            transform: translateZ(0);
+            backface-visibility: hidden;
+        }
+        
+        /* Reduce paint areas */
+        .stat-card,
+        .chart-container,
+        .mobile-menu-header,
+        .mobile-nav-items {
+            contain: layout style;
         }
 
-        /* --- UI Animations --- */
+        /* --- UI Animations (Optimized) --- */
         .page-content {
             display: none;
-            animation: pageEnter 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            animation: pageEnter 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         @keyframes pageEnter {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; transform: translate3d(0, 10px, 0); }
+            to { opacity: 1; transform: translate3d(0, 0, 0); }
         }
 
         /* Fixed Centered Notification */
         @keyframes fadeInDown {
-            from { opacity: 0; transform: translate(-50%, -15px); }
-            to { opacity: 1; transform: translate(-50%, 0); }
+            from { opacity: 0; transform: translate3d(-50%, -15px, 0); }
+            to { opacity: 1; transform: translate3d(-50%, 0, 0); }
         }
 
         .animate-fade-in-down {
-            animation: fadeInDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation: fadeInDown 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
         .nav-button.active {
@@ -59,6 +99,14 @@
         /* Button press feedback */
         button:not(.mobile-menu-close):not(.hamburger-button):active {
             transform: scale(0.98);
+        }
+        
+        /* Better touch targets for mobile */
+        @media (max-width: 640px) {
+            button, a, input[type="checkbox"], .mobile-nav-item {
+                min-height: 44px;
+                min-width: 44px;
+            }
         }
 
         /* --- Scanner Styling --- */
@@ -104,10 +152,22 @@
             50% { top: 80%; opacity: 1; }
         }
 
-        /* --- Chart Visuals --- */
-        .chart-bar { transition: height 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-        .line-path { fill: none; stroke: #3b82f6; stroke-width: 3; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
-        .area-path { fill: rgba(59, 130, 246, 0.08); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        /* --- Chart Visuals (Optimized) --- */
+        .chart-bar { 
+            transition: height 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            will-change: height;
+        }
+        .line-path { 
+            fill: none; 
+            stroke: #3b82f6; 
+            stroke-width: 3; 
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            will-change: transform;
+        }
+        .area-path { 
+            fill: rgba(59, 130, 246, 0.08); 
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
 
         /* --- Print Utilities --- */
         @media print {
@@ -115,9 +175,10 @@
             body { background: white; }
         }
         
-        /* Loading overlay */
+        /* Loading overlay (Optimized) */
         #loading-overlay {
-            transition: opacity 0.3s ease;
+            transition: opacity 0.25s ease;
+            will-change: opacity;
         }
         
         #loading-overlay.hidden {
@@ -136,6 +197,19 @@
         .mobile-table-container {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
+            contain: layout style paint;
+            will-change: scroll-position;
+        }
+        
+        /* Optimize table rendering */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            contain: layout;
+        }
+        
+        table tr {
+            will-change: contents;
         }
 
         /* Dashboard specific styles */
@@ -442,7 +516,7 @@
             margin-bottom: 1rem;
         }
 
-        /* Autocomplete styles */
+        /* Autocomplete styles (Optimized) */
         .autocomplete-items {
             position: absolute;
             border: 1px solid #d1d5db;
@@ -456,6 +530,8 @@
             background-color: white;
             border-radius: 0 0 1rem 1rem;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            will-change: opacity;
+            transform: translateZ(0);
         }
         
         .autocomplete-items div {
@@ -463,6 +539,7 @@
             cursor: pointer;
             background-color: white;
             border-bottom: 1px solid #f3f4f6;
+            transition: background-color 0.15s ease;
         }
         
         .autocomplete-items div:hover {
@@ -498,41 +575,82 @@
         .mobile-menu {
             position: fixed;
             top: 0;
-            left: 0;
-            width: 100%;
+            right: 0;
+            width: 85%;
+            max-width: 320px;
             height: 100%;
-            background: rgba(0, 0, 0, 0.95);
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
             z-index: 9999;
             display: flex;
             flex-direction: column;
-            transform: translateX(-100%);
-            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: translate3d(100%, 0, 0);
+            transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: -4px 0 24px rgba(0, 0, 0, 0.3);
+            will-change: transform;
         }
         
         .mobile-menu.open {
-            transform: translateX(0);
+            transform: translate3d(0, 0, 0);
+        }
+        
+        .mobile-menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 9998;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+            will-change: opacity;
+        }
+        
+        .mobile-menu-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
         }
         
         .mobile-menu-header {
-            padding: 1rem;
-            border-bottom: 1px solid #333;
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            background: rgba(0, 0, 0, 0.3);
         }
         
         .mobile-menu-title {
             font-size: 1.25rem;
-            font-weight: 600;
+            font-weight: 800;
             color: white;
+            letter-spacing: -0.02em;
         }
         
         .mobile-menu-close {
-            background: none;
+            background: rgba(255, 255, 255, 0.1);
             border: none;
             color: white;
             font-size: 1.5rem;
             cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        
+        .mobile-menu-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+        
+        .mobile-menu-close:active {
+            transform: scale(0.95);
         }
         
         .mobile-nav-items {
@@ -541,27 +659,38 @@
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
+            overflow-y: auto;
         }
         
         .mobile-nav-item {
             display: flex;
             align-items: center;
             gap: 1rem;
-            padding: 1rem;
+            padding: 1rem 1.25rem;
             color: white;
             text-decoration: none;
-            border-radius: 0.5rem;
-            transition: background 0.15s ease;
+            border-radius: 16px;
+            transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
             cursor: pointer;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.05);
+            margin-bottom: 0.25rem;
+            will-change: transform, background;
         }
         
         .mobile-nav-item:hover, .mobile-nav-item.active {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.15);
+            transform: translate3d(-4px, 0, 0);
         }
         
         .mobile-nav-item:active {
-            background: rgba(255, 255, 255, 0.15);
-            transform: scale(0.99);
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate3d(-4px, 0, 0) scale(0.98);
+        }
+        
+        .mobile-nav-item.active {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
         }
         
         .mobile-nav-item i {
@@ -570,10 +699,106 @@
         }
         
         .mobile-user-info {
-            padding: 1rem;
-            border-top: 1px solid #333;
-            color: #9ca3af;
-            font-size: 0.875rem;
+            padding: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.75rem;
+            background: rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+        
+        /* Mobile optimizations */
+        @media (max-width: 640px) {
+            .mobile-table-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            /* Optimize table for small screens */
+            table th, table td {
+                font-size: 0.75rem;
+                padding: 0.75rem 0.5rem;
+            }
+            
+            /* Adjust stat cards for mobile */
+            .stat-card {
+                padding: 1.25rem;
+            }
+            
+            .stat-value {
+                font-size: 1.75rem;
+            }
+            
+            /* Optimize form inputs */
+            input, textarea, select {
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+            
+            /* Compact buttons on mobile */
+            button {
+                padding: 0.75rem 1rem;
+                font-size: 0.875rem;
+            }
+            
+            /* Better spacing for mobile */
+            .p-8 {
+                padding: 1rem !important;
+            }
+            
+            /* Optimize modal for mobile */
+            .modal-content {
+                width: 95%;
+                max-width: none;
+            }
+            
+            /* Adjust navigation for mobile */
+            .nav-button {
+                font-size: 0.7rem;
+                padding: 0.625rem 0.875rem;
+            }
+            
+            /* Optimize chart containers */
+            .chart-container {
+                padding: 1rem;
+                height: 250px;
+            }
+            
+            /* Better product table for mobile */
+            #products-table input {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.875rem;
+            }
+            
+            /* Optimize stock table */
+            #stock-table-body button {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.75rem;
+            }
+            
+            /* Better toast notifications */
+            #toast-display {
+                max-width: 90%;
+                padding: 0.75rem 1rem;
+                font-size: 0.875rem;
+            }
+            
+            /* Optimize QR modal */
+            #qr-modal .bg-white {
+                padding: 1.5rem;
+                border-radius: 1.5rem;
+            }
+            
+            /* Better order cards */
+            .recent-activity-item {
+                padding: 0.75rem;
+                font-size: 0.875rem;
+            }
+            
+            /* Optimize hamburger button */
+            #hamburger-toggle {
+                padding: 0.75rem;
+                border-radius: 12px;
+            }
         }
     </style>
 </head>
@@ -660,10 +885,13 @@
         </div>
     </header>
 
+    <!-- Mobile Hamburger Menu Overlay -->
+    <div class="mobile-menu-overlay" id="mobile-menu-overlay"></div>
+
     <!-- Mobile Hamburger Menu -->
     <div class="mobile-menu" id="mobile-menu">
         <div class="mobile-menu-header">
-            <div class="mobile-menu-title">QUICKBILL PRO</div>
+            <div class="mobile-menu-title">QUICKBILL<span style="color: #3b82f6;">PRO</span></div>
             <button class="mobile-menu-close" id="mobile-menu-close">
                 <i class="material-icons">close</i>
             </button>
@@ -965,12 +1193,33 @@
         let messageTimeout = null;
         let resolveConfirmationPromise;
 
-        // --- Helper Functions ---
+        // --- Helper Functions (Optimized) ---
+        let toastQueue = [];
+        let isToastVisible = false;
+        
         function showToast(txt) {
+            toastQueue.push(txt);
+            if (!isToastVisible) {
+                displayNextToast();
+            }
+        }
+        
+        function displayNextToast() {
+            if (toastQueue.length === 0) {
+                isToastVisible = false;
+                return;
+            }
+            
+            isToastVisible = true;
+            const txt = toastQueue.shift();
             const el = document.getElementById('toast-display');
             document.getElementById('toast-text').innerText = txt;
             el.classList.remove('hidden');
-            setTimeout(() => el.classList.add('hidden'), 3500);
+            
+            setTimeout(() => {
+                el.classList.add('hidden');
+                setTimeout(displayNextToast, 200);
+            }, 2500);
         }
 
         function showConfirmation(message) {
@@ -1048,13 +1297,23 @@
 
         Quagga.onDetected(data => {
             const code = data.codeResult.code;
-            const item = stock.find(s => s.name === code);
+            console.log('Scanned barcode:', code);
+            
+            // Look up product by barcode ID
+            const item = stock.find(s => s.barcode && s.barcode === code);
+            
             if(item) {
                 addItemRowWithData(item.name, item.price);
-                showToast(`Detected: ${item.name}`);
+                showToast(`Added: ${item.name} (₹${item.price.toFixed(2)})`);
             } else {
-                addItemRowWithData(code, 0);
-                showToast("New Item Detected");
+                // Fallback: try to find by name for backward compatibility
+                const itemByName = stock.find(s => s.name === code);
+                if (itemByName) {
+                    addItemRowWithData(itemByName.name, itemByName.price);
+                    showToast(`Added: ${itemByName.name}`);
+                } else {
+                    showToast(`Product not found. Barcode: ${code}`);
+                }
             }
             stopScanner();
         });
@@ -1064,8 +1323,18 @@
             document.getElementById('scanner-overlay').style.display = 'none';
         }
 
-        // --- Autocomplete Functions ---
+        // --- Autocomplete Functions (Optimized with Debouncing) ---
+        let autocompleteTimer;
+        
         function showAutocomplete(input, value, index) {
+            // Debounce for performance
+            clearTimeout(autocompleteTimer);
+            autocompleteTimer = setTimeout(() => {
+                showAutocompleteImmediate(input, value, index);
+            }, 150);
+        }
+        
+        function showAutocompleteImmediate(input, value, index) {
             closeAllLists();
             if (!value) return;
             
@@ -1073,11 +1342,15 @@
             autocompleteList.setAttribute('id', `autocomplete-list-${index}`);
             autocompleteList.className = 'autocomplete-items';
             
-            const matches = stock.filter(item => 
-                item.name.toLowerCase().includes(value.toLowerCase())
-            );
+            // Optimize: Limit results to 10 for better performance
+            const matches = stock
+                .filter(item => item.name.toLowerCase().includes(value.toLowerCase()))
+                .slice(0, 10);
             
             if (matches.length === 0) return;
+            
+            // Use DocumentFragment for better performance
+            const fragment = document.createDocumentFragment();
             
             matches.forEach(item => {
                 const suggestionDiv = document.createElement('div');
@@ -1105,9 +1378,10 @@
                     if (quantityInput) quantityInput.focus();
                 });
                 
-                autocompleteList.appendChild(suggestionDiv);
+                fragment.appendChild(suggestionDiv);
             });
             
+            autocompleteList.appendChild(fragment);
             input.parentNode.appendChild(autocompleteList);
         }
         
@@ -1116,44 +1390,56 @@
             Array.from(lists).forEach(list => list.remove());
         }
 
-        // --- Navigation ---
+        // --- Navigation (Optimized) ---
         function renderPage(id) {
-            document.querySelectorAll('.page-content').forEach(p => p.style.display = 'none');
-            document.querySelectorAll('.nav-button').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.mobile-nav-item').forEach(b => b.classList.remove('active'));
-            
-            const target = document.getElementById(`page-${id}`);
-            if(target) target.style.display = 'block';
-            
-            const navBtn = document.getElementById(`nav-${id}`);
-            if(navBtn) navBtn.classList.add('active');
+            // Use requestAnimationFrame for smooth transitions
+            requestAnimationFrame(() => {
+                document.querySelectorAll('.page-content').forEach(p => p.style.display = 'none');
+                document.querySelectorAll('.nav-button').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.mobile-nav-item').forEach(b => b.classList.remove('active'));
+                
+                const target = document.getElementById(`page-${id}`);
+                if(target) target.style.display = 'block';
+                
+                const navBtn = document.getElementById(`nav-${id}`);
+                if(navBtn) navBtn.classList.add('active');
 
-            const mobileNavItem = document.querySelector(`.mobile-nav-item[data-page="${id}"]`);
-            if(mobileNavItem) mobileNavItem.classList.add('active');
+                const mobileNavItem = document.querySelector(`.mobile-nav-item[data-page="${id}"]`);
+                if(mobileNavItem) mobileNavItem.classList.add('active');
 
-            if(id === 'dashboard') updateDashboardData(dashboardRange);
-            if(id === 'stock') renderStock();
-            if(id === 'allOrders') renderAllOrders();
-            if(id === 'notes') renderNotes();
-            if(id === 'settings') renderSettings();
-            if(id === 'addOrder') renderAddOrderForm();
+                // Defer heavy rendering operations
+                requestAnimationFrame(() => {
+                    if(id === 'dashboard') updateDashboardData(dashboardRange);
+                    if(id === 'stock') renderStock();
+                    if(id === 'allOrders') renderAllOrders();
+                    if(id === 'notes') renderNotes();
+                    if(id === 'settings') renderSettings();
+                    if(id === 'addOrder') renderAddOrderForm();
+                });
+            });
         }
 
         // --- Hamburger Menu Logic ---
         const hamburgerToggle = document.getElementById('hamburger-toggle');
         const mobileMenu = document.getElementById('mobile-menu');
+        const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
         const mobileMenuClose = document.getElementById('mobile-menu-close');
         const mobileNavItems = document.querySelectorAll('.mobile-nav-item');
 
         hamburgerToggle.addEventListener('click', () => {
             mobileMenu.classList.add('open');
-            document.body.classList.add('menu-open');
+            mobileMenuOverlay.classList.add('open');
+            document.body.style.overflow = 'hidden';
         });
 
-        mobileMenuClose.addEventListener('click', () => {
+        const closeMenu = () => {
             mobileMenu.classList.remove('open');
-            document.body.classList.remove('menu-open');
-        });
+            mobileMenuOverlay.classList.remove('open');
+            document.body.style.overflow = '';
+        };
+
+        mobileMenuClose.addEventListener('click', closeMenu);
+        mobileMenuOverlay.addEventListener('click', closeMenu);
 
         mobileNavItems.forEach(item => {
             item.addEventListener('click', (e) => {
@@ -1161,8 +1447,7 @@
                 const page = item.dataset.page;
                 
                 // Close menu first for smoother UX
-                mobileMenu.classList.remove('open');
-                document.body.classList.remove('menu-open');
+                closeMenu();
                 
                 // Update active state
                 mobileNavItems.forEach(navItem => {
@@ -1175,13 +1460,6 @@
                     renderPage(page);
                 }, 100);
             });
-        });
-
-        mobileMenu.addEventListener('click', (e) => {
-            if (e.target === mobileMenu) {
-                mobileMenu.classList.remove('open');
-                document.body.classList.remove('menu-open');
-            }
         });
 
         // --- Dashboard Logic ---
@@ -1919,6 +2197,7 @@
                         `;
                     } else {
                         const isLowStock = item.quantity <= 5;
+                        const barcodeDisplay = item.barcode || 'Not generated';
                         row.innerHTML = `
                             <td class="p-8 font-black text-sm">${item.name}</td>
                             <td class="p-8 font-bold text-gray-500">₹${item.price.toFixed(2)}</td>
@@ -1928,9 +2207,12 @@
                                 </span>
                             </td>
                             <td class="p-8">
-                                <button onclick="generateBarcode('${item.id}')" class="bg-indigo-600 text-white px-4 py-2 rounded-2xl text-sm font-black hover:bg-indigo-700 transition-colors shadow-sm flex items-center justify-center gap-2">
-                                    <i class="material-icons text-lg">qr_code</i> Generate
-                                </button>
+                                <div class="flex flex-col items-start gap-2">
+                                    <button onclick="generateBarcode('${item.id}')" class="bg-indigo-600 text-white px-4 py-2 rounded-2xl text-sm font-black hover:bg-indigo-700 transition-colors shadow-sm flex items-center justify-center gap-2">
+                                        <i class="material-icons text-lg">qr_code</i> Generate
+                                    </button>
+                                    <span class="text-xs text-gray-500 font-mono">${barcodeDisplay}</span>
+                                </div>
                             </td>
                             <td class="p-8 text-right">
                                 <div class="flex gap-2 justify-end">
@@ -1978,6 +2260,7 @@
 
             const newStockItem = {
                 id: crypto.randomUUID(),
+                barcode: `${Date.now()}${Math.floor(Math.random() * 10000)}`, // Unique numeric barcode
                 name: productName,
                 price: productPrice,
                 quantity: productQuantity,
@@ -2038,6 +2321,10 @@
                 stock[itemIndex].price = newPrice;
                 stock[itemIndex].quantity = newQuantity;
                 stock[itemIndex].isEditing = false;
+                // Preserve barcode when editing
+                if (!stock[itemIndex].barcode) {
+                    stock[itemIndex].barcode = `${Date.now()}${Math.floor(Math.random() * 10000)}`;
+                }
                 stock.sort((a, b) => a.name.localeCompare(b.name));
                 saveDataToLocalStorage('stock', stock);
                 showToast("Stock item updated!");
@@ -2738,56 +3025,90 @@
             const billNotes = companyDetails.defaultBillNotes || '';
 
             billToPrintDiv.innerHTML = `
-                <div class="p-8 bg-white text-black rounded-lg shadow-xl w-full" style="min-height: 297mm; width: 210mm; box-sizing: border-box;">
-                    <h1 class="text-5xl font-bold text-center mb-4">${companyDetails.companyName || 'Your Company Name'}</h1>
-                    <div class="text-sm text-center mb-6 leading-tight">
-                        ${companyDetails.address ? `<p>${companyDetails.address}</p>` : ''}
-                        ${companyDetails.phone || companyDetails.email ? `<p>${companyDetails.phone ? `Phone: ${companyDetails.phone}` : ''} ${companyDetails.phone && companyDetails.email ? '|' : ''} ${companyDetails.email ? `Email: ${companyDetails.email}` : ''}</p>` : ''}
-                        ${companyDetails.gstNumber ? `<p>GSTIN: ${companyDetails.gstNumber}</p>` : ''}
-                    </div>
-
-                    <div class="flex justify-between items-start mb-6 border-b border-gray-300 pb-4">
-                        <div>
-                            <p class="font-semibold text-lg mb-1">Bill To:</p>
-                            <p class="text-xl font-bold">${order.buyerName}</p>
-                        </div>
-                        <div class="text-right text-sm">
-                            <p>Date: ${new Date(order.orderDate).toLocaleDateString(undefined, dateOptions)}</p>
-                            <p>Time: ${new Date(order.orderDate).toLocaleTimeString(undefined, timeOptions)}</p>
-                            <p>Order ID: ${order.id || 'N/A'}</p>
+                <div class="p-8 bg-white text-black" style="min-height: 297mm; width: 210mm; box-sizing: border-box; font-family: 'Inter', sans-serif; position: relative;">
+                    <!-- Header with gradient background -->
+                    <div style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); padding: 2rem; border-radius: 1.5rem; margin-bottom: 2rem; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);">
+                        <h1 style="font-size: 2.5rem; font-weight: 800; color: white; text-align: center; margin: 0; letter-spacing: -0.02em;">
+                            ${companyDetails.companyName || 'QuickBill Pro'}
+                        </h1>
+                        <div style="text-align: center; color: rgba(255, 255, 255, 0.95); font-size: 0.9rem; margin-top: 0.75rem; line-height: 1.6;">
+                            ${companyDetails.address ? `<p style="margin: 0.25rem 0;">${companyDetails.address}</p>` : ''}
+                            ${companyDetails.phone || companyDetails.email ? `<p style="margin: 0.25rem 0;">${companyDetails.phone ? `📞 ${companyDetails.phone}` : ''} ${companyDetails.phone && companyDetails.email ? ' • ' : ''} ${companyDetails.email ? `✉️ ${companyDetails.email}` : ''}</p>` : ''}
+                            ${companyDetails.gstNumber ? `<p style="margin: 0.25rem 0; font-weight: 600;">GSTIN: ${companyDetails.gstNumber}</p>` : ''}
                         </div>
                     </div>
 
-                    <table class="min-w-full bg-white border border-gray-300 mb-8" style="border-collapse: collapse;">
+                    <!-- Bill Info Section -->
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 2rem; padding: 1.5rem; background: #f9fafb; border-radius: 1rem; border-left: 4px solid #3b82f6;">
+                        <div style="flex: 1;">
+                            <p style="font-size: 0.75rem; font-weight: 700; color: #6b7280; text-transform: uppercase; margin: 0 0 0.5rem 0; letter-spacing: 0.05em;">Bill To</p>
+                            <p style="font-size: 1.5rem; font-weight: 700; color: #111827; margin: 0;">${order.buyerName}</p>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="background: white; padding: 1rem; border-radius: 0.75rem; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);">
+                                <p style="font-size: 0.75rem; color: #6b7280; margin: 0.25rem 0;">📅 ${new Date(order.orderDate).toLocaleDateString(undefined, dateOptions)}</p>
+                                <p style="font-size: 0.75rem; color: #6b7280; margin: 0.25rem 0;">🕐 ${new Date(order.orderDate).toLocaleTimeString(undefined, timeOptions)}</p>
+                                <p style="font-size: 0.875rem; font-weight: 700; color: #3b82f6; margin: 0.5rem 0 0 0;">ID: #${order.id || 'N/A'}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Items Table with modern styling -->
+                    <table style="width: 100%; border-collapse: separate; border-spacing: 0; margin-bottom: 2rem; border-radius: 1rem; overflow: hidden; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);">
                         <thead>
-                            <tr class="bg-gray-100 border-b border-gray-300">
-                                <th class="py-3 px-4 text-left text-sm font-semibold uppercase border border-gray-300">Product</th>
-                                <th class="py-3 px-4 text-left text-sm font-semibold uppercase border border-gray-300">Quantity</th>
-                                <th class="py-3 px-4 text-left text-sm font-semibold uppercase border border-gray-300">Price/Unit</th>
-                                <th class="py-3 px-4 text-right text-sm font-semibold uppercase border border-gray-300">Total</th>
+                            <tr style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%);">
+                                <th style="padding: 1rem; text-align: left; font-size: 0.75rem; font-weight: 800; color: white; text-transform: uppercase; letter-spacing: 0.05em;">Product</th>
+                                <th style="padding: 1rem; text-align: center; font-size: 0.75rem; font-weight: 800; color: white; text-transform: uppercase; letter-spacing: 0.05em;">Qty</th>
+                                <th style="padding: 1rem; text-align: center; font-size: 0.75rem; font-weight: 800; color: white; text-transform: uppercase; letter-spacing: 0.05em;">Price/Unit</th>
+                                <th style="padding: 1rem; text-align: right; font-size: 0.75rem; font-weight: 800; color: white; text-transform: uppercase; letter-spacing: 0.05em;">Total</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody style="background: white;">
                             ${order.items.map((item, index) => `
-                                <tr class="border-b border-gray-200 last:border-b-0">
-                                    <td class="py-3 px-4 text-base border border-gray-300">${item.product}</td>
-                                    <td class="py-3 px-4 text-base border border-gray-300">${item.quantity}</td>
-                                    <td class="py-3 px-4 text-base border border-gray-300">₹${item.pricePerUnit.toFixed(2)}</td>
-                                    <td class="py-3 px-4 text-right text-base border border-gray-300">₹${item.total.toFixed(2)}</td>
+                                <tr style="border-bottom: 1px solid #f3f4f6; ${index % 2 === 0 ? 'background: #fafafa;' : 'background: white;'}">
+                                    <td style="padding: 1rem; font-size: 0.95rem; font-weight: 600; color: #111827;">${item.product}</td>
+                                    <td style="padding: 1rem; text-align: center; font-size: 0.95rem; color: #4b5563;">${item.quantity}</td>
+                                    <td style="padding: 1rem; text-align: center; font-size: 0.95rem; color: #4b5563;">₹${item.pricePerUnit.toFixed(2)}</td>
+                                    <td style="padding: 1rem; text-align: right; font-size: 0.95rem; font-weight: 700; color: #111827;">₹${item.total.toFixed(2)}</td>
                                 </tr>
                             `).join('')}
                         </tbody>
                     </table>
 
-                    <div class="flex justify-end pr-4 text-xl font-bold">
-                        <p>Grand Total: ₹${order.grandTotal.toFixed(2)}</p>
+                    <!-- Grand Total Section -->
+                    <div style="display: flex; justify-content: flex-end; margin-bottom: 2rem;">
+                        <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 1.5rem 2.5rem; border-radius: 1rem; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+                            <p style="font-size: 0.875rem; color: rgba(255, 255, 255, 0.9); margin: 0 0 0.25rem 0; text-transform: uppercase; letter-spacing: 0.05em;">Grand Total</p>
+                            <p style="font-size: 2rem; font-weight: 800; color: white; margin: 0;">₹${order.grandTotal.toFixed(2)}</p>
+                        </div>
                     </div>
 
-                    ${billNotes ? `<div class="text-left mt-4 text-sm"><p>Notes: ${billNotes}</p></div>` : ''}
+                    ${billNotes ? `
+                        <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 1rem 1.5rem; border-radius: 0.75rem; margin-bottom: 2rem;">
+                            <p style="font-size: 0.75rem; font-weight: 700; color: #92400e; text-transform: uppercase; margin: 0 0 0.5rem 0;">📝 Notes</p>
+                            <p style="font-size: 0.875rem; color: #78350f; margin: 0; line-height: 1.6;">${billNotes}</p>
+                        </div>
+                    ` : ''}
 
-                    <div class="mt-12 text-center text-sm text-gray-600">
-                        <p>Thank you for your business!</p>
-                        <p>This is a computer generated bill and does not require a signature.</p>
+                    <!-- Thank You Message -->
+                    <div style="text-align: center; padding: 1.5rem; background: #f9fafb; border-radius: 1rem; margin-bottom: 3rem;">
+                        <p style="font-size: 1.25rem; font-weight: 700; color: #3b82f6; margin: 0 0 0.5rem 0;">✨ Thank you for your business! ✨</p>
+                        <p style="font-size: 0.875rem; color: #6b7280; margin: 0;">This is a computer-generated bill and does not require a signature.</p>
+                    </div>
+
+                    <!-- Footer with logo and branding -->
+                    <div style="position: absolute; bottom: 2rem; left: 2rem; right: 2rem; border-top: 2px solid #e5e7eb; padding-top: 1.5rem;">
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 1rem;">
+                            <!-- App Logo (Icon) -->
+                            <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);">
+                                <span style="font-size: 24px; font-weight: 800; color: white;">QB</span>
+                            </div>
+                            <!-- App Name and Tagline -->
+                            <div style="text-align: left;">
+                                <p style="font-size: 1.125rem; font-weight: 800; color: #111827; margin: 0; letter-spacing: -0.02em;">QuickBill<span style="color: #3b82f6;">Pro</span></p>
+                                <p style="font-size: 0.75rem; color: #6b7280; margin: 0;">Fast • Modern • Reliable</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             `;
@@ -2869,18 +3190,25 @@ ${itemsList}`;
                 return;
             }
             
+            // Ensure item has a barcode
+            if (!item.barcode) {
+                item.barcode = `${Date.now()}${Math.floor(Math.random() * 10000)}`;
+                saveDataToLocalStorage('stock', stock);
+            }
+            
             // Create a canvas for barcode
             const canvas = document.createElement('canvas');
             
             try {
-                // Generate barcode using the product name as the barcode value
-                JsBarcode(canvas, item.name, {
+                // Generate barcode using the numeric barcode ID
+                JsBarcode(canvas, item.barcode, {
                     format: "CODE128",
                     width: 2,
                     height: 100,
                     displayValue: true,
                     fontSize: 16,
-                    margin: 10
+                    margin: 10,
+                    text: `${item.name} - ${item.barcode}`
                 });
                 
                 // Convert canvas to image and download
@@ -2888,12 +3216,12 @@ ${itemsList}`;
                     const url = URL.createObjectURL(blob);
                     const link = document.createElement('a');
                     link.href = url;
-                    link.download = `barcode_${item.name.replace(/\s+/g, '_')}.png`;
+                    link.download = `barcode_${item.name.replace(/\s+/g, '_')}_${item.barcode}.png`;
                     document.body.appendChild(link);
                     link.click();
                     document.body.removeChild(link);
                     URL.revokeObjectURL(url);
-                    showToast(`Barcode for "${item.name}" downloaded!`);
+                    showToast(`Barcode for "${item.name}" downloaded! ID: ${item.barcode}`);
                 });
             } catch (error) {
                 console.error('Barcode generation error:', error);
@@ -3100,19 +3428,23 @@ ${itemsList}`;
             stock = storedStock.map(item => ({
                 ...item,
                 price: parseFloat(item.price),
-                quantity: item.quantity !== undefined ? parseInt(item.quantity) : 0
+                quantity: item.quantity !== undefined ? parseInt(item.quantity) : 0,
+                barcode: item.barcode || `${Date.now()}${Math.floor(Math.random() * 10000)}` // Assign barcode to old items
             }));
             stock.sort((a, b) => a.name.localeCompare(b.name));
+            
+            // Save stock with new barcodes
+            saveDataToLocalStorage('stock', stock);
 
-            // Hide loading overlay
+            // Hide loading overlay (Optimized)
             setTimeout(() => {
                 const loadingOverlay = document.getElementById('loading-overlay');
                 loadingOverlay.style.opacity = '0';
                 setTimeout(() => {
                     loadingOverlay.classList.add('hidden');
                     renderPage('dashboard');
-                }, 300);
-            }, 800);
+                }, 250);
+            }, 600);
         });
 
         // Navigation event listeners
